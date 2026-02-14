@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -13,15 +13,25 @@ import { Button } from '@/components/ui/button';
 import { Loader2 } from 'lucide-react';
 import { CountriesMapSelector } from '../country/CountriesMapSelector';
 import { useSaveCallerUserProfile } from './useSaveCallerUserProfile';
+import { useGetCallerUserProfile } from './useGetCallerUserProfile';
 
 interface ProfileSetupDialogProps {
   open: boolean;
 }
 
 export function ProfileSetupDialog({ open }: ProfileSetupDialogProps) {
+  const { data: existingProfile } = useGetCallerUserProfile();
   const [name, setName] = useState('');
   const [country, setCountry] = useState<string>('');
   const saveMutation = useSaveCallerUserProfile();
+
+  // Prefill name if profile exists but country is missing
+  useEffect(() => {
+    if (existingProfile) {
+      setName(existingProfile.name || '');
+      setCountry(existingProfile.country || '');
+    }
+  }, [existingProfile]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -29,6 +39,12 @@ export function ProfileSetupDialog({ open }: ProfileSetupDialogProps) {
       saveMutation.mutate({ name: name.trim(), country });
     }
   };
+
+  const errorMessage = saveMutation.isError 
+    ? (saveMutation.error as Error)?.message?.includes('Country')
+      ? 'Country selection is required.'
+      : 'Failed to save profile. Please try again.'
+    : null;
 
   return (
     <Dialog open={open}>
@@ -38,9 +54,13 @@ export function ProfileSetupDialog({ open }: ProfileSetupDialogProps) {
       >
         <form onSubmit={handleSubmit}>
           <DialogHeader>
-            <DialogTitle>Welcome to HeartSync</DialogTitle>
+            <DialogTitle>
+              {existingProfile?.name ? 'Complete Your Profile' : 'Welcome to HeartSync'}
+            </DialogTitle>
             <DialogDescription>
-              Let's get started by setting up your profile.
+              {existingProfile?.name 
+                ? 'Please select your country to continue.' 
+                : "Let's get started by setting up your profile."}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-6 py-4">
@@ -52,7 +72,7 @@ export function ProfileSetupDialog({ open }: ProfileSetupDialogProps) {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 disabled={saveMutation.isPending}
-                autoFocus
+                autoFocus={!existingProfile?.name}
               />
             </div>
 
@@ -62,9 +82,9 @@ export function ProfileSetupDialog({ open }: ProfileSetupDialogProps) {
               disabled={saveMutation.isPending}
             />
 
-            {saveMutation.isError && (
+            {errorMessage && (
               <p className="text-sm text-destructive">
-                Failed to save profile. Please try again.
+                {errorMessage}
               </p>
             )}
           </div>

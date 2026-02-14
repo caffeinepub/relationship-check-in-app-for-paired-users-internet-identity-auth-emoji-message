@@ -1,9 +1,9 @@
 {
-  "frontend/src/App.tsx": "Main application component that orchestrates authentication flow, profile setup, pairing status, relationship status chooser gating, and paired-user navigation between Dashboard, EmotionalMap, and Settings views.",
+  "frontend/src/App.tsx": "Main application component that gates authenticated users without a profile or with missing/empty country field into ProfileSetupDialog before allowing access to pairing, dashboard, or settings views, with proper TypeScript null-safety checks.",
   "frontend/src/components/auth/LoginButton.tsx": "Login/logout button component that uses Internet Identity hook and clears query cache on logout.",
   "frontend/src/components/layout/AppLayout.tsx": "Reusable layout wrapper with header (brand, pairing status badge), main content area, footer with \"Created by Angelica Arboleda\" credit line, and Toaster component for toast notifications.",
   "frontend/src/features/profile/useGetCallerUserProfile.ts": "React Query hook to fetch current user profile with proper actor dependency handling to prevent modal flash.",
-  "frontend/src/features/profile/ProfileSetupDialog.tsx": "Profile setup modal that collects user name and country selection via CountriesMapSelector, requiring both fields before allowing submission.",
+  "frontend/src/features/profile/ProfileSetupDialog.tsx": "Profile setup modal that collects user name and mandatory country selection, prefills existing name when only country is missing, and displays clear error messages for validation failures.",
   "frontend/src/features/pairing/usePairingStatus.ts": "React Query hook that fetches partner principal and profile to determine pairing status.",
   "frontend/src/features/pairing/PairingCard.tsx": "Two-column card UI for generating invite codes and joining with partner's code.",
   "frontend/src/features/pairing/useInviteToken.ts": "React Query mutation hook to generate invite tokens with local state management.",
@@ -23,14 +23,15 @@
   "frontend/src/lib/checkInHelpers.ts": "Shared helper function to extract the latest check-in by author from a list of check-ins, used by both TodayStatusCard and EmotionalMapView.",
   "frontend/src/features/pairing/useDisconnectPartner.ts": "React Query mutation hook that calls backend disconnect() and invalidates all pairing-dependent queries including relationship status.",
   "frontend/src/features/emotionalmap/EmotionalMapView.tsx": "EmotionalMap view that fetches today's check-ins, compares latest emojis between user and partner, and displays large centered emojis with exact status messages per requirements.",
-  "frontend/src/features/settings/SettingsView.tsx": "Settings view with country display/edit section using CountriesMapSelector and partner disconnect functionality with confirmation dialog.",
+  "frontend/src/features/settings/SettingsView.tsx": "Settings view with country display/edit section using CountriesMapSelector, partner disconnect functionality, and improved error handling for country validation failures.",
   "frontend/src/features/relationshipStatus/useRelationshipStatusState.ts": "React Query hook that fetches relationship status and determines if the caller is the designated chooser using the correct can_set_relationship_status field from the strongly-typed UserProfile.",
   "frontend/src/features/relationshipStatus/useSetRelationshipStatus.ts": "React Query mutation hook that validates user eligibility via frontend guard before calling backend setRelationshipStatus, with proper error handling and query invalidation.",
   "frontend/src/features/relationshipStatus/ChooseRelationshipStatusView.tsx": "Centered minimal view displaying six relationship status options as large buttons, handling selection with loading states and success/error toasts.",
   "frontend/src/features/streak/useSharedStreak.ts": "React Query hook that fetches the shared streak count from the backend using the getSharedStreak method with proper actor dependency handling.",
   "frontend/src/features/streak/StreakSection.tsx": "Centered streak display component that shows the shared streak count with conditional text based on streak value, includes one-time animation when streak increases, and hides when not paired.",
-  "frontend/src/features/country/countries.ts": "Static list of 68+ countries with ISO codes and names, sorted alphabetically, with helper function to retrieve country by code.",
+  "frontend/src/features/country/countries.ts": "Exports a complete, unique, alphabetically-sorted country list derived from the ISO dataset with helper function to retrieve country by code.",
   "frontend/src/features/country/worldMapPaths.ts": "Simplified SVG path data for interactive world map with country shapes and center coordinates for major countries.",
-  "frontend/src/features/country/CountriesMapSelector.tsx": "Reusable country selection component with interactive SVG map (click to select) and searchable Command dropdown fallback using shadcn/ui components.",
-  "frontend/src/features/profile/useSaveCallerUserProfile.ts": "React Query mutation hook for saving caller profile (name and country) with automatic query invalidation on success."
+  "frontend/src/features/country/CountriesMapSelector.tsx": "Reusable country selection component with interactive SVG map and searchable Command dropdown that scales to all countries with improved search including both name and code.",
+  "frontend/src/features/profile/useSaveCallerUserProfile.ts": "React Query mutation hook for saving caller profile with frontend validation ensuring country is non-empty before backend submission and clear error messaging.",
+  "frontend/src/features/country/iso3166Alpha2.ts": "Complete ISO 3166-1 alpha-2 dataset containing all 249 countries and territories with their official codes and English names."
 }

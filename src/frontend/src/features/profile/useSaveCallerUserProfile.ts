@@ -4,7 +4,7 @@ import type { UserProfile } from '../../backend';
 
 interface SaveProfileParams {
   name: string;
-  country?: string;
+  country: string;
 }
 
 export function useSaveCallerUserProfile() {
@@ -15,13 +15,18 @@ export function useSaveCallerUserProfile() {
     mutationFn: async ({ name, country }: SaveProfileParams) => {
       if (!actor) throw new Error('Actor not available');
       
+      // Frontend validation: ensure country is provided and not empty
+      const trimmedCountry = country?.trim() || '';
+      if (!trimmedCountry) {
+        throw new Error('Country selection is required.');
+      }
+      
       const profile: UserProfile = {
-        name,
+        name: name.trim(),
         premium: false,
         can_set_relationship_status: false,
         streak_count: BigInt(0),
-        last_checkin_date: undefined,
-        country: country || undefined,
+        country: trimmedCountry,
       };
       
       await actor.saveCallerUserProfile(profile);

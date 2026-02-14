@@ -1,62 +1,79 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Country map selection and profile persistence (frontend)",
+  "title": "Mandatory ISO country selection for onboarding and profile saves",
   "requirements": [
     {
-      "id": "REQ-35",
-      "summary": "Add an interactive Countries Map selector with searchable fallback to profile setup, and save selected country via existing profile save flow with React Query refresh.",
+      "id": "REQ-37",
+      "summary": "Expand the frontend country dataset to a complete ISO 3166-1 alpha-2 list and ensure the selector can search/select any country.",
       "acceptanceCriteria": [
-        "The profile setup experience includes a country selection step/control with a visible map-based interaction.",
-        "If the user cannot or does not want to use the map, they can still select a country via a searchable dropdown/list.",
-        "Submitting the profile saves both `name` and `country` and refreshes `currentUserProfile` via React Query invalidation."
+        "The exported `COUNTRIES` list includes all countries worldwide (complete ISO 3166-1 alpha-2 coverage, not a small subset).",
+        "The country list is unique by `code`, has non-empty `name` values, and remains sorted alphabetically by country name.",
+        "The searchable dropdown in `CountriesMapSelector` can find and select any country in the updated list."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/features/country/countries.ts",
+          "path": "frontend/src/features/country/iso3166Alpha2.ts",
           "operation": "create",
-          "description": "Add a maintained, static list of countries (name + stable identifier such as ISO code) to power both the map selector and searchable fallback. Keep data local (no external services)."
+          "description": "Add a complete static ISO 3166-1 alpha-2 dataset (code + English name) for all countries/territories intended for the app; keep it source-controlled and not fetched at runtime."
+        },
+        {
+          "path": "frontend/src/features/country/countries.ts",
+          "operation": "modify",
+          "description": "Update the exported `COUNTRIES` to be derived from the full ISO dataset; enforce uniqueness by `code`, non-empty names, and alphabetical sort by `name` before export; keep `getCountryByCode` behavior consistent."
         },
         {
           "path": "frontend/src/features/country/CountriesMapSelector.tsx",
-          "operation": "create",
-          "description": "Create a reusable country selection component that provides (1) a visible interactive map-based picker and (2) a searchable dropdown/list fallback. Use existing shadcn/ui components (e.g., Card/Popover/Command/Input/Button) for the searchable UI and selection states; compose components only (do not edit immutable ui components). Verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/features/country/worldMapPaths.ts",
-          "operation": "create",
-          "description": "Add a lightweight, static SVG path dataset (or other low-fidelity, locally-stored vector representation) mapping stable country identifiers to drawable shapes for the interactive map. Keep fidelity intentionally low per non-goals and avoid adding third-party services."
-        },
-        {
-          "path": "frontend/src/features/profile/useSaveCallerUserProfile.ts",
-          "operation": "create",
-          "description": "Add a dedicated React Query mutation hook for saving the caller profile that (a) accepts user-editable fields (at minimum: name and country), (b) submits via the existing backend actor save flow, and (c) invalidates the ['currentUserProfile'] query on success to refresh currentUserProfile."
-        },
-        {
-          "path": "frontend/src/features/profile/ProfileSetupDialog.tsx",
           "operation": "modify",
-          "description": "Extend the profile setup modal to include country selection using the new CountriesMapSelector (interactive map + searchable fallback). Update submit logic to save both name and country via the shared save mutation hook, and ensure ['currentUserProfile'] invalidation still occurs after a successful save. Verify the component's usage instructions before implementing."
+          "description": "Ensure the searchable dropdown scales to the expanded list and reliably searches/filters across all entries (e.g., by ensuring CommandItem searchable value includes country name and optionally code); continue composing existing shadcn/ui components (Command/Popover/Button/etc.) and verify the component's usage instructions before implementing."
         }
       ]
     },
     {
-      "id": "REQ-36",
-      "summary": "Allow onboarded users to view and update their country in Settings using the same country selector, persisting via profile save and reflecting after reload.",
+      "id": "REQ-38",
+      "summary": "Block normal app usage until an authenticated user has a non-empty country saved, reusing the existing profile setup dialog flow.",
       "acceptanceCriteria": [
-        "Settings includes a section to view and edit the current user’s country.",
-        "Updating the country persists and is reflected after refresh/reload (pulled from `getCallerUserProfile`).",
-        "User-facing text for this feature is in English."
+        "If `getCallerUserProfile()` returns `null`, the existing profile setup dialog is shown (current behavior preserved).",
+        "If `getCallerUserProfile()` returns a profile whose `country` is missing/empty, the profile setup dialog is shown and the user cannot proceed into pairing/dashboard/settings views until a country is saved.",
+        "The Profile Setup submit button remains disabled until both a non-empty name and a selected country are present.",
+        "All user-facing validation/error messages introduced or changed for this requirement are in English."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/features/settings/SettingsView.tsx",
+          "path": "frontend/src/App.tsx",
           "operation": "modify",
-          "description": "Add a new Settings section (English UI text) to display the current user's saved country and allow editing. Reuse CountriesMapSelector for map interaction + searchable fallback, and persist changes via useSaveCallerUserProfile with React Query invalidation so updates reflect immediately and after reload. Verify the component's usage instructions before implementing."
+          "description": "Extend the gating logic so authenticated users are forced into `ProfileSetupDialog` not only when the profile is null, but also when the fetched profile exists and `country` is missing/empty after trimming; ensure this gating occurs before pairing/dashboard/settings/relationship-status views are reachable."
         },
         {
-          "path": "frontend/src/features/profile/useGetCallerUserProfile.ts",
+          "path": "frontend/src/features/profile/ProfileSetupDialog.tsx",
           "operation": "modify",
-          "description": "Ensure the current user profile query state cleanly supports displaying an unset country and provides the needed data for Settings to render the current country without errors (no behavior change to authorization/auth flow)."
+          "description": "Update the dialog to support the 'missing country' case (e.g., prefill and/or lock in the existing saved name while requiring a valid country selection); keep submit disabled until `name.trim()` and a selected country are present; keep all user-facing messaging in English; continue composing existing shadcn/ui dialog/input/button components and verify the component's usage instructions before implementing."
+        }
+      ]
+    },
+    {
+      "id": "REQ-40",
+      "summary": "Ensure profile saves always submit a valid country when required and surface backend validation failures with a clear English message to select a country.",
+      "acceptanceCriteria": [
+        "The frontend mutation that saves a user profile does not send `country` as undefined/empty when the user is required to choose a country.",
+        "If the backend rejects a save due to missing country, the UI shows an English error message indicating country selection is required.",
+        "Settings country edit continues to prevent saving when no country is selected (current UX preserved)."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/features/profile/useSaveCallerUserProfile.ts",
+          "operation": "modify",
+          "description": "Normalize and always submit `country` as a non-empty trimmed string when provided/required (never undefined/empty); add a frontend-side guard that prevents invoking the backend save when country is missing in required flows, and propagate a clear error so UIs can display an English 'country is required' message."
+        },
+        {
+          "path": "frontend/src/features/profile/ProfileSetupDialog.tsx",
+          "operation": "modify",
+          "description": "Improve save error handling to detect and display a clear English message when a save fails due to missing/invalid country (e.g., 'Country selection is required.'); keep existing shadcn/ui composition and verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/features/settings/SettingsView.tsx",
+          "operation": "modify",
+          "description": "Preserve existing UX preventing saving with no selected country, and additionally surface a clear English error toast/message if a save attempt is rejected due to missing country; continue composing existing shadcn/ui components and verify the component's usage instructions before implementing."
         }
       ]
     }

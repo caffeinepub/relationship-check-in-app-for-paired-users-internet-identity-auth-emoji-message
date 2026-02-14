@@ -1,64 +1,62 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-14T21:46:05.313Z",
+  "generatedAt": "2026-02-14T21:55:28.734Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 5,
-    "implemented": 2,
+    "total": 4,
+    "implemented": 3,
     "items": [
       {
-        "id": "REQ-32",
-        "summary": "Extend the backend `UserProfile` data model to include a persisted country field for each user (e.g., `country : ?Text` storing an ISO country code or a stable country identifier), and expose it through existing profile query methods.",
-        "status": "unknown",
-        "plannedFiles": [],
-        "matchedFiles": []
-      },
-      {
-        "id": "REQ-33",
-        "summary": "Update `saveCallerUserProfile(profile : UserProfile)` so that saving profile details cannot unintentionally overwrite server-managed or pairing-related fields; it must preserve existing values for `premium`, `partner_ref`, `relationship_status`, `can_set_relationship_status`, `streak_count`, and `last_checkin_date`, while allowing the caller to update only user-editable fields (at minimum: `name` and the new `country` field).",
-        "status": "unknown",
-        "plannedFiles": [],
-        "matchedFiles": []
-      },
-      {
-        "id": "REQ-34",
-        "summary": "Add a conditional backend migration (only if required by existing persisted state) to initialize the new profile country field for all existing users to `null`/unset (or another safe default) without modifying any other existing fields.",
-        "status": "unknown",
-        "plannedFiles": [],
-        "matchedFiles": []
-      },
-      {
-        "id": "REQ-35",
-        "summary": "Add a frontend “Countries Map” selection UI that allows a user to choose their country from an interactive map (with a usability fallback such as a searchable dropdown/list), and store the selected value in the user profile via the existing profile save flow.",
+        "id": "REQ-37",
+        "summary": "Update the frontend country dataset to include all countries worldwide (use a complete ISO 3166-1 alpha-2 list), ensuring the selectable list used by the country selector contains every country/territory intended for the app.",
         "status": "implemented",
         "plannedFiles": [
+          "frontend/src/features/country/iso3166Alpha2.ts",
           "frontend/src/features/country/countries.ts",
-          "frontend/src/features/country/CountriesMapSelector.tsx",
-          "frontend/src/features/country/worldMapPaths.ts",
-          "frontend/src/features/profile/useSaveCallerUserProfile.ts",
+          "frontend/src/features/country/CountriesMapSelector.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/features/country/iso3166Alpha2.ts",
+          "frontend/src/features/country/countries.ts",
+          "frontend/src/features/country/CountriesMapSelector.tsx"
+        ]
+      },
+      {
+        "id": "REQ-38",
+        "summary": "Make country selection mandatory for onboarding: if an authenticated user does not yet have a country saved in their profile, the app must block normal app usage and present the profile setup flow until a valid country is selected and saved.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/App.tsx",
           "frontend/src/features/profile/ProfileSetupDialog.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/features/country/countries.ts",
-          "frontend/src/features/country/CountriesMapSelector.tsx",
-          "frontend/src/features/country/worldMapPaths.ts",
-          "frontend/src/features/profile/useSaveCallerUserProfile.ts",
+          "frontend/src/App.tsx",
           "frontend/src/features/profile/ProfileSetupDialog.tsx"
         ]
       },
       {
-        "id": "REQ-36",
-        "summary": "Allow an already-onboarded user to change their saved country later from within the app (e.g., in Settings), using the same country map selector and persisting the change to their profile.",
+        "id": "REQ-39",
+        "summary": "Enforce mandatory country selection on the backend: reject profile saves that do not include a valid country value, so a user cannot persist a profile without selecting a country.",
+        "status": "unknown",
+        "plannedFiles": [],
+        "matchedFiles": []
+      },
+      {
+        "id": "REQ-40",
+        "summary": "Update the frontend profile save flow to always submit a selected country (no undefined/empty country values) and to surface backend validation failures with a clear English error message prompting the user to select a country.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/features/settings/SettingsView.tsx",
-          "frontend/src/features/profile/useGetCallerUserProfile.ts"
+          "frontend/src/features/profile/useSaveCallerUserProfile.ts",
+          "frontend/src/features/profile/ProfileSetupDialog.tsx",
+          "frontend/src/features/settings/SettingsView.tsx"
         ],
         "matchedFiles": [
+          "frontend/src/features/profile/useSaveCallerUserProfile.ts",
+          "frontend/src/features/profile/ProfileSetupDialog.tsx",
           "frontend/src/features/settings/SettingsView.tsx"
         ]
       }
@@ -71,13 +69,14 @@
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
+    "frontend/src/App.tsx",
     "frontend/src/backend.d.ts",
     "frontend/src/backend.ts",
     "frontend/src/declarations/backend.did.d.ts",
     "frontend/src/declarations/backend.did.js",
     "frontend/src/features/country/CountriesMapSelector.tsx",
     "frontend/src/features/country/countries.ts",
-    "frontend/src/features/country/worldMapPaths.ts",
+    "frontend/src/features/country/iso3166Alpha2.ts",
     "frontend/src/features/profile/ProfileSetupDialog.tsx",
     "frontend/src/features/profile/useSaveCallerUserProfile.ts",
     "frontend/src/features/settings/SettingsView.tsx",

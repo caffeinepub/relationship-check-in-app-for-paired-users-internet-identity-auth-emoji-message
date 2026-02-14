@@ -28,7 +28,7 @@ export const RelationshipStatus = IDL.Record({
 export const UserProfile = IDL.Record({
   'relationship_status' : IDL.Opt(RelationshipStatus),
   'streak_count' : IDL.Nat,
-  'country' : IDL.Opt(IDL.Text),
+  'country' : IDL.Text,
   'can_set_relationship_status' : IDL.Bool,
   'premium' : IDL.Bool,
   'partner_ref' : IDL.Opt(IDL.Principal),
@@ -104,7 +104,7 @@ export const idlFactory = ({ IDL }) => {
   const UserProfile = IDL.Record({
     'relationship_status' : IDL.Opt(RelationshipStatus),
     'streak_count' : IDL.Nat,
-    'country' : IDL.Opt(IDL.Text),
+    'country' : IDL.Text,
     'can_set_relationship_status' : IDL.Bool,
     'premium' : IDL.Bool,
     'partner_ref' : IDL.Opt(IDL.Principal),

@@ -1,7 +1,6 @@
 import { useState, useMemo } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -135,7 +134,8 @@ export function CountriesMapSelector({ value, onChange, disabled }: CountriesMap
                   {COUNTRIES.map((country) => (
                     <CommandItem
                       key={country.code}
-                      value={country.name}
+                      value={`${country.name} ${country.code}`}
+                      keywords={[country.name, country.code]}
                       onSelect={() => {
                         onChange(country.code);
                         setOpen(false);

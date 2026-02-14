@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 17,
+  "projectStateVersion": 19,
   "summary": "Relationship app for two connected users to do a daily emotional check-in (emoji selection + short message), with authentication, a Firebase/Firestore backend, premium tier for multiple check-ins per day, plus an Emotional Map page, a Settings option to remove/disconnect a partner, a shared relationship status chosen by the invited partner during pairing and displayed on Home, and a shared daily streak feature that increments only when both partners check in on the same day and is displayed on Home.",
   "architectural_notes": [
     "Use Firebase as the backend (authentication + data storage) for users, couple connections, and daily check-ins.",
@@ -186,6 +186,30 @@
       "title": "Allow an already-onboarded user to change their saved country later from within the app (e.g., in Settings), using the same country map selector and persisting the change to their profile.",
       "reqIds": [
         "REQ-36"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-frontend-country-dataset-to-include-all-countries-worldwide-use-a-complete-iso-3166-1-alpha-2-list-ensuring-the-selectable-list-used-by-the-country-selector-contains-every-country-territory-intended-for-the-app",
+      "title": "Update the frontend country dataset to include all countries worldwide (use a complete ISO 3166-1 alpha-2 list), ensuring the selectable list used by the country selector contains every country/territory intended for the app.",
+      "reqIds": [
+        "REQ-37"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-make-country-selection-mandatory-for-onboarding-if-an-authenticated-user-does-not-yet-have-a-country-saved-in-their-profile-the-app-must-block-normal-app-usage-and-present-the-profile-setup-flow-until-a-valid-country-is-selected-and-saved",
+      "title": "Make country selection mandatory for onboarding: if an authenticated user does not yet have a country saved in their profile, the app must block normal app usage and present the profile setup flow until a valid country is selected and saved.",
+      "reqIds": [
+        "REQ-38"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-frontend-profile-save-flow-to-always-submit-a-selected-country-no-undefined-empty-country-values-and-to-surface-backend-validation-failures-with-a-clear-english-error-message-prompting-the-user-to-select-a-country",
+      "title": "Update the frontend profile save flow to always submit a selected country (no undefined/empty country values) and to surface backend validation failures with a clear English error message prompting the user to select a country.",
+      "reqIds": [
+        "REQ-40"
       ],
       "version": 1
     }
@@ -380,6 +404,20 @@
       "summary": "Add a conditional backend migration (only if required by existing persisted state) to initialize the new profile country field for all existing users to `null`/unset (or another safe default) without modifying any other existing fields.",
       "reqIds": [
         "REQ-34"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-37",
+      "summary": "Countries selector must include all countries worldwide and make country selection mandatory (required field)",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-40",
+      "summary": "Enforce mandatory country selection on the backend: reject profile saves that do not include a valid country value, so a user cannot persist a profile without selecting a country.",
+      "reqIds": [
+        "REQ-39"
       ],
       "status": "pending"
     }

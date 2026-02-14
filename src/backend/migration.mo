@@ -2,41 +2,58 @@ import Map "mo:core/Map";
 import Principal "mo:core/Principal";
 
 module {
+  // Old UserProfile type with optional country
   type OldUserProfile = {
     name : Text;
     premium : Bool;
-    partner_ref : ?Principal.Principal;
-    relationship_status : ?RelationshipStatus;
-    can_set_relationship_status : Bool;
-    streak_count : Nat;
-    last_checkin_date : ?Nat;
-  };
-
-  type OldActor = {
-    userProfiles : Map.Map<Principal.Principal, OldUserProfile>;
-  };
-
-  type NewUserProfile = {
-    name : Text;
-    premium : Bool;
-    partner_ref : ?Principal.Principal;
-    relationship_status : ?RelationshipStatus;
+    partner_ref : ?Principal;
+    relationship_status : ?{
+      status : Text;
+      customMessage : Text;
+    };
     can_set_relationship_status : Bool;
     streak_count : Nat;
     last_checkin_date : ?Nat;
     country : ?Text;
   };
 
-  type NewActor = {
-    userProfiles : Map.Map<Principal.Principal, NewUserProfile>;
+  // New UserProfile type with mandatory (non-optional) country field
+  type NewUserProfile = {
+    name : Text;
+    premium : Bool;
+    partner_ref : ?Principal;
+    relationship_status : ?{
+      status : Text;
+      customMessage : Text;
+    };
+    can_set_relationship_status : Bool;
+    streak_count : Nat;
+    last_checkin_date : ?Nat;
+    country : Text;
   };
 
+  // Old actor type (checkIns Map is now obsolete)
+  type OldActor = {
+    userProfiles : Map.Map<Principal, OldUserProfile>;
+    tokens : Map.Map<Text, Principal>;
+  };
+
+  // New actor type (removes obsolete checkIns field)
+  type NewActor = {
+    userProfiles : Map.Map<Principal, NewUserProfile>;
+    tokens : Map.Map<Text, Principal>;
+  };
+
+  // Perform migration from old to new actor state
   public func run(old : OldActor) : NewActor {
-    let newUserProfiles = old.userProfiles.map<Principal.Principal, OldUserProfile, NewUserProfile>(
+    let newUserProfiles = old.userProfiles.map<Principal, OldUserProfile, NewUserProfile>(
       func(_principal, oldProfile) {
         {
           oldProfile with
-          country = null;
+          country = switch (oldProfile.country) {
+            case (null) { "" };
+            case (?country) { country };
+          };
         };
       }
     );
@@ -44,10 +61,5 @@ module {
       old with
       userProfiles = newUserProfiles;
     };
-  };
-
-  public type RelationshipStatus = {
-    status : Text;
-    customMessage : Text;
   };
 };

@@ -53,9 +53,12 @@ export default function App() {
     );
   }
 
-  // Show profile setup if needed (prevent flash by checking isFetched)
-  const showProfileSetup = isAuthenticated && !profileLoading && isFetched && userProfile === null;
-  if (showProfileSetup) {
+  // Show profile setup if profile is null OR if country is missing/empty
+  const needsProfileSetup = isAuthenticated && !profileLoading && isFetched && (
+    userProfile === null || (userProfile && (!userProfile.country || userProfile.country.trim() === ''))
+  );
+  
+  if (needsProfileSetup) {
     return (
       <AppLayout>
         <ProfileSetupDialog open={true} />

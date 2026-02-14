@@ -10,9 +10,9 @@ import Runtime "mo:core/Runtime";
 import Principal "mo:core/Principal";
 import MixinAuthorization "authorization/MixinAuthorization";
 import AccessControl "authorization/access-control";
+import Migration "migration";
 import InviteLinksModule "invite-links/invite-links-module";
 import Random "mo:core/Random";
-import Migration "migration";
 
 (with migration = Migration.run)
 actor {
@@ -29,7 +29,7 @@ actor {
     can_set_relationship_status : Bool;
     streak_count : Nat;
     last_checkin_date : ?Nat;
-    country : ?Text;
+    country : Text;
   };
 
   public type CheckIn = {
@@ -118,6 +118,10 @@ actor {
       Runtime.trap("Unauthorized: Only users can save profiles");
     };
 
+    if (profile.country == "") {
+      Runtime.trap("Country must be specified");
+    };
+
     let oldProfile = switch (userProfiles.get(caller)) {
       case (null) {
         {
@@ -178,7 +182,7 @@ actor {
           can_set_relationship_status = false;
           streak_count = 0;
           last_checkin_date = null;
-          country = null;
+          country = "";
         };
         userProfiles.add(caller, newProfile);
         let token = caller.toText();
@@ -216,7 +220,7 @@ actor {
           can_set_relationship_status = false;
           streak_count = 0;
           last_checkin_date = null;
-          country = null;
+          country = "";
         };
         userProfiles.add(caller, newProfile);
       };
@@ -239,7 +243,7 @@ actor {
               can_set_relationship_status = false;
               streak_count = 0;
               last_checkin_date = null;
-              country = null;
+              country = "";
             };
             userProfiles.add(inviter, newProfile);
             newProfile;
@@ -260,7 +264,7 @@ actor {
           can_set_relationship_status = true;
           streak_count = 0;
           last_checkin_date = null;
-          country = null;
+          country = "";
         };
 
         userProfiles.add(inviter, inviterProfile);
@@ -600,3 +604,4 @@ actor {
     };
   };
 };
+

@@ -1,106 +1,91 @@
 {
   "kind": "build_request",
-  "title": "Add country map selection and save each user's country in their profile",
+  "title": "Require mandatory country selection and include all world countries",
   "priority": "normal",
   "requirements": [
     {
-      "id": "REQ-32",
-      "text": "Extend the backend `UserProfile` data model to include a persisted country field for each user (e.g., `country : ?Text` storing an ISO country code or a stable country identifier), and expose it through existing profile query methods.",
-      "target": "backend",
-      "source": {
-        "messageIds": [
-          "msg-6"
-        ],
-        "quotes": [
-          "falta el mapa de los paises y que cada user elija su pais"
-        ]
-      },
-      "acceptanceCriteria": [
-        "Calling `getCallerUserProfile()` returns the caller profile including the new country field.",
-        "Calling `getUserProfile(principal)` returns the user profile including the new country field (subject to existing access rules).",
-        "Existing users without a country saved do not break profile reads (country is `null`/unset by default)."
-      ]
-    },
-    {
-      "id": "REQ-33",
-      "text": "Update `saveCallerUserProfile(profile : UserProfile)` so that saving profile details cannot unintentionally overwrite server-managed or pairing-related fields; it must preserve existing values for `premium`, `partner_ref`, `relationship_status`, `can_set_relationship_status`, `streak_count`, and `last_checkin_date`, while allowing the caller to update only user-editable fields (at minimum: `name` and the new `country` field).",
-      "target": "backend",
-      "source": {
-        "messageIds": [
-          "msg-6"
-        ],
-        "quotes": [
-          "falta el mapa de los paises y que cada user elija su pais"
-        ]
-      },
-      "acceptanceCriteria": [
-        "Saving a profile updates the caller’s `name` and `country` but does not change pairing, relationship status, premium, or streak fields.",
-        "A malicious/incorrect frontend payload cannot clear `partner_ref` or reset streak/status via `saveCallerUserProfile`."
-      ]
-    },
-    {
-      "id": "REQ-34",
-      "text": "Add a conditional backend migration (only if required by existing persisted state) to initialize the new profile country field for all existing users to `null`/unset (or another safe default) without modifying any other existing fields.",
-      "target": "backend",
-      "source": {
-        "messageIds": [
-          "msg-6"
-        ],
-        "quotes": [
-          "falta el mapa de los paises y que cada user elija su pais"
-        ]
-      },
-      "acceptanceCriteria": [
-        "After upgrade, pre-existing user profiles continue to load successfully.",
-        "Country is initialized to the chosen default for existing profiles and can be updated later."
-      ]
-    },
-    {
-      "id": "REQ-35",
-      "text": "Add a frontend “Countries Map” selection UI that allows a user to choose their country from an interactive map (with a usability fallback such as a searchable dropdown/list), and store the selected value in the user profile via the existing profile save flow.",
+      "id": "REQ-37",
+      "text": "Update the frontend country dataset to include all countries worldwide (use a complete ISO 3166-1 alpha-2 list), ensuring the selectable list used by the country selector contains every country/territory intended for the app.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-6"
+          "msg-user-1"
         ],
         "quotes": [
-          "falta el mapa de los paises y que cada user elija su pais"
+          "tienen que estar todos los paises del mundo y tiene que ser obligatorio seleccionar pais"
         ]
       },
       "acceptanceCriteria": [
-        "The profile setup experience includes a country selection step/control with a visible map-based interaction.",
-        "If the user cannot or does not want to use the map, they can still select a country via a searchable dropdown/list.",
-        "Submitting the profile saves both `name` and `country` and refreshes `currentUserProfile` via React Query invalidation."
+        "The exported `COUNTRIES` list includes all countries worldwide (complete ISO 3166-1 alpha-2 coverage, not a small subset).",
+        "The country list is unique by `code`, has non-empty `name` values, and remains sorted alphabetically by country name.",
+        "The searchable dropdown in `CountriesMapSelector` can find and select any country in the updated list."
       ]
     },
     {
-      "id": "REQ-36",
-      "text": "Allow an already-onboarded user to change their saved country later from within the app (e.g., in Settings), using the same country map selector and persisting the change to their profile.",
+      "id": "REQ-38",
+      "text": "Make country selection mandatory for onboarding: if an authenticated user does not yet have a country saved in their profile, the app must block normal app usage and present the profile setup flow until a valid country is selected and saved.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-6"
+          "msg-user-1"
         ],
         "quotes": [
-          "falta el mapa de los paises y que cada user elija su pais"
+          "tienen que estar todos los paises del mundo y tiene que ser obligatorio seleccionar pais"
         ]
       },
       "acceptanceCriteria": [
-        "Settings includes a section to view and edit the current user’s country.",
-        "Updating the country persists and is reflected after refresh/reload (pulled from `getCallerUserProfile`).",
-        "User-facing text for this feature is in English."
+        "If `getCallerUserProfile()` returns `null`, the existing profile setup dialog is shown (current behavior preserved).",
+        "If `getCallerUserProfile()` returns a profile whose `country` is missing/empty, the profile setup dialog is shown and the user cannot proceed into pairing/dashboard/settings views until a country is saved.",
+        "The Profile Setup submit button remains disabled until both a non-empty name and a selected country are present.",
+        "All user-facing validation/error messages introduced or changed for this requirement are in English."
+      ]
+    },
+    {
+      "id": "REQ-39",
+      "text": "Enforce mandatory country selection on the backend: reject profile saves that do not include a valid country value, so a user cannot persist a profile without selecting a country.",
+      "target": "backend",
+      "source": {
+        "messageIds": [
+          "msg-user-1"
+        ],
+        "quotes": [
+          "tienen que estar todos los paises del mundo y tiene que ser obligatorio seleccionar pais"
+        ]
+      },
+      "acceptanceCriteria": [
+        "`saveCallerUserProfile` traps/rejects when the incoming `country` value is null/absent or an empty string (after trimming).",
+        "When `saveCallerUserProfile` succeeds, the stored profile’s `country` is set to the provided value and remains persisted for future reads.",
+        "Existing server-managed fields (e.g., `premium`, `partner_ref`, `relationship_status`, `can_set_relationship_status`, `streak_count`, `last_checkin_date`) continue to be preserved as they are today when saving profiles."
+      ]
+    },
+    {
+      "id": "REQ-40",
+      "text": "Update the frontend profile save flow to always submit a selected country (no undefined/empty country values) and to surface backend validation failures with a clear English error message prompting the user to select a country.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-user-1"
+        ],
+        "quotes": [
+          "tienen que estar todos los paises del mundo y tiene que ser obligatorio seleccionar pais"
+        ]
+      },
+      "acceptanceCriteria": [
+        "The frontend mutation that saves a user profile does not send `country` as undefined/empty when the user is required to choose a country.",
+        "If the backend rejects a save due to missing country, the UI shows an English error message indicating country selection is required.",
+        "Settings country edit continues to prevent saving when no country is selected (current UX preserved)."
       ]
     }
   ],
   "constraints": [
-    "Backend must remain a single Motoko actor in `backend/main.mo`; do not introduce additional backend services.",
-    "Do not edit files under `frontend/src/components/ui` or any other `frontend.immutablePaths` entries; compose existing UI components instead.",
-    "Do not add third-party auth providers or external databases/services for country data."
+    "Do not edit files under `frontend/src/hooks/useInternetIdentity.ts`, `frontend/src/hooks/useInternetIdentity.tsx`, `frontend/src/hooks/useActor.ts`, `frontend/src/main.tsx`, or anything under `frontend/src/components/ui` (compose existing components instead).",
+    "Backend must remain a single Motoko actor with all logic in `backend/main.mo`.",
+    "Only add/modify `backend/migration.mo` if a state upgrade is strictly necessary (conditional migration policy)."
   ],
   "nonGoals": [
-    "Automatic geolocation/GPS-based country detection.",
-    "Rendering a high-fidelity GIS map with full administrative boundaries.",
-    "Storing precise location data (coordinates, addresses) beyond a country identifier."
+    "Creating or upgrading the interactive SVG world map to accurately include clickable shapes for every country (the requirement is that all countries are available for selection; the map can remain low-fidelity).",
+    "Adding geolocation/GPS-based auto-detection of country.",
+    "Adding third-party APIs or external datasets fetched at runtime."
   ],
   "imageRequirements": {
     "required": [],

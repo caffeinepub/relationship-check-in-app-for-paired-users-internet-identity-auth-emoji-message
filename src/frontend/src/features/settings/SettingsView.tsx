@@ -58,7 +58,10 @@ export function SettingsView({ onDisconnectSuccess }: SettingsViewProps) {
   };
 
   const handleSaveCountry = async () => {
-    if (!userProfile || !selectedCountry) return;
+    if (!userProfile || !selectedCountry) {
+      toast.error('Country selection is required.');
+      return;
+    }
     
     try {
       await saveProfileMutation.mutateAsync({
@@ -67,8 +70,11 @@ export function SettingsView({ onDisconnectSuccess }: SettingsViewProps) {
       });
       toast.success('Country updated successfully.');
       setEditingCountry(false);
-    } catch (error) {
-      toast.error('Failed to update country. Please try again.');
+    } catch (error: any) {
+      const errorMsg = error?.message?.includes('Country') 
+        ? 'Country selection is required.' 
+        : 'Failed to update country. Please try again.';
+      toast.error(errorMsg);
     }
   };
 

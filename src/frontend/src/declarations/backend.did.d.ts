@@ -36,7 +36,7 @@ export type Token = string;
 export interface UserProfile {
   'relationship_status' : [] | [RelationshipStatus],
   'streak_count' : bigint,
-  'country' : [] | [string],
+  'country' : string,
   'can_set_relationship_status' : boolean,
   'premium' : boolean,
   'partner_ref' : [] | [Principal],
