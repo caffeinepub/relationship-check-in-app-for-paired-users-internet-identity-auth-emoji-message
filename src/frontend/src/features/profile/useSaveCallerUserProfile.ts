@@ -24,7 +24,6 @@ export function useSaveCallerUserProfile() {
       const profile: UserProfile = {
         name: name.trim(),
         premium: false,
-        can_set_relationship_status: false,
         streak_count: BigInt(0),
         country: trimmedCountry,
       };

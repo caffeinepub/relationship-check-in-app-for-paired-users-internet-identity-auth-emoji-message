@@ -1,74 +1,72 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-14T22:07:58.918Z",
+  "generatedAt": "2026-02-14T22:16:21.988Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
     "total": 3,
-    "implemented": 3,
+    "implemented": 2,
     "items": [
       {
-        "id": "REQ-41",
-        "summary": "Remove the interactive world map from the country selection UI and replace it with a simple searchable country selector only (dropdown/command search), while preserving the existing ISO-3166-1 alpha-2 country dataset and the existing profile save flow.",
+        "id": "REQ-44",
+        "summary": "Update the backend relationship-status update logic so that, after the initial relationship status has been set, either partner can change the relationship status later and the new value is saved to BOTH user profiles.",
+        "status": "unknown",
+        "plannedFiles": [],
+        "matchedFiles": []
+      },
+      {
+        "id": "REQ-45",
+        "summary": "Update the frontend relationship-status mutation logic to support both flows: (1) initial status selection restricted to the invited user and (2) subsequent status changes allowed by either paired user when a status already exists.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/features/country/CountriesMapSelector.tsx",
-          "frontend/src/features/country/worldMapPaths.ts",
-          "frontend/src/features/profile/ProfileSetupDialog.tsx",
-          "frontend/src/features/settings/SettingsView.tsx"
+          "frontend/src/features/relationshipStatus/useSetRelationshipStatus.ts",
+          "frontend/src/features/relationshipStatus/useSetRelationshipStatus.ts"
         ],
         "matchedFiles": [
-          "frontend/src/features/country/CountriesMapSelector.tsx",
-          "frontend/src/features/country/worldMapPaths.ts",
-          "frontend/src/features/profile/ProfileSetupDialog.tsx",
-          "frontend/src/features/settings/SettingsView.tsx"
+          "frontend/src/features/relationshipStatus/useSetRelationshipStatus.ts",
+          "frontend/src/features/relationshipStatus/useSetRelationshipStatus.ts"
         ]
       },
       {
-        "id": "REQ-42",
-        "summary": "When two paired users have both saved a valid country, display both users’ country flags at the very top of the app (in the global header area), with a heart icon between them.",
+        "id": "REQ-46",
+        "summary": "Add a Settings UI control that allows a paired user to change the existing relationship status (using the same set of status options already used in the app), and show an English success toast after saving.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/features/country/flagEmoji.ts",
-          "frontend/src/features/pairing/usePairingStatus.ts",
-          "frontend/src/components/layout/AppLayout.tsx"
+          "frontend/src/features/relationshipStatus/relationshipStatusOptions.ts",
+          "frontend/src/features/relationshipStatus/ChooseRelationshipStatusView.tsx",
+          "frontend/src/features/relationshipStatus/ChangeRelationshipStatusControl.tsx",
+          "frontend/src/features/settings/SettingsView.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/features/country/flagEmoji.ts",
-          "frontend/src/features/pairing/usePairingStatus.ts",
-          "frontend/src/components/layout/AppLayout.tsx"
-        ]
-      },
-      {
-        "id": "REQ-43",
-        "summary": "Set the heart icon color (between the two flags) based on the current shared relationship status value; if no relationship status exists, use a neutral/default heart color.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/features/relationshipStatus/relationshipStatusColors.ts",
-          "frontend/src/components/layout/AppLayout.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/features/relationshipStatus/relationshipStatusColors.ts",
-          "frontend/src/components/layout/AppLayout.tsx"
+          "frontend/src/features/relationshipStatus/relationshipStatusOptions.ts",
+          "frontend/src/features/relationshipStatus/ChooseRelationshipStatusView.tsx",
+          "frontend/src/features/relationshipStatus/ChangeRelationshipStatusControl.tsx",
+          "frontend/src/features/settings/SettingsView.tsx"
         ]
       }
     ]
   },
   "changedFiles": [
+    "backend/main.mo",
+    "backend/migration.mo",
     "build-request.json",
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/src/components/layout/AppLayout.tsx",
-    "frontend/src/features/country/CountriesMapSelector.tsx",
-    "frontend/src/features/country/flagEmoji.ts",
-    "frontend/src/features/country/worldMapPaths.ts",
-    "frontend/src/features/pairing/usePairingStatus.ts",
-    "frontend/src/features/profile/ProfileSetupDialog.tsx",
-    "frontend/src/features/relationshipStatus/relationshipStatusColors.ts",
+    "frontend/src/App.tsx",
+    "frontend/src/backend.d.ts",
+    "frontend/src/backend.ts",
+    "frontend/src/declarations/backend.did.d.ts",
+    "frontend/src/declarations/backend.did.js",
+    "frontend/src/features/profile/useSaveCallerUserProfile.ts",
+    "frontend/src/features/relationshipStatus/ChangeRelationshipStatusControl.tsx",
+    "frontend/src/features/relationshipStatus/ChooseRelationshipStatusView.tsx",
+    "frontend/src/features/relationshipStatus/relationshipStatusOptions.ts",
+    "frontend/src/features/relationshipStatus/useRelationshipStatusState.ts",
+    "frontend/src/features/relationshipStatus/useSetRelationshipStatus.ts",
     "frontend/src/features/settings/SettingsView.tsx",
     "project_state.json",
     "scratch/component-selection.json",

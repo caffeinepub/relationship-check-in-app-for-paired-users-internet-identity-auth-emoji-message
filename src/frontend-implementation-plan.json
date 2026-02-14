@@ -1,86 +1,58 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Replace map-based country selection with searchable selector and add paired flags + relationship-colored heart in header",
+  "title": "Enable relationship status changes for paired users in UI",
   "requirements": [
     {
-      "id": "REQ-41",
-      "summary": "Replace the world map country picker with a simple searchable country selector while keeping the existing ISO alpha-2 dataset and profile save flow.",
+      "id": "REQ-45",
+      "summary": "Update relationship-status mutation logic to allow initial set only by invited user, and allow later changes by either paired user once a status exists.",
       "acceptanceCriteria": [
-        "In the profile setup flow, users can select a country using a searchable selector without any map or SVG world map being rendered.",
-        "In Settings > Country edit, users can select a country using the same searchable selector without any map being rendered.",
-        "All countries remain selectable using the existing ISO-3166-1 alpha-2 dataset.",
-        "User-facing helper text is updated to remove any mention of clicking on a map (English only)."
+        "If no relationship status exists yet, attempting to set it from a user who is not the invited user is blocked with a clear English error message.",
+        "If a relationship status already exists, either paired user can submit a status change successfully from the UI.",
+        "After a successful status change, React Query invalidates/refetches ['relationshipStatus'], ['currentUserProfile'], and any partner/profile queries needed so the new status (and header heart color) updates immediately without a hard refresh."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/features/country/CountriesMapSelector.tsx",
+          "path": "frontend/src/features/relationshipStatus/useSetRelationshipStatus.ts",
           "operation": "modify",
-          "description": "Remove all SVG/world-map rendering and any map-related helper text; keep only a searchable selector UI backed by the existing COUNTRIES ISO alpha-2 list. Use shadcn-ui composed primitives (Command, Popover, Button, etc.) to provide dropdown/command search; do not modify any files under frontend/src/components/ui. Verify the component's usage instructions before implementing."
+          "description": "Adjust the mutation guard to support two flows: (1) if cached/fetched relationship status is null/unset, enforce \"invited user only\" (using the existing profile flag check); (2) if a relationship status already exists, allow the mutation for either paired user. Ensure errors are thrown in clear English when blocked."
         },
         {
-          "path": "frontend/src/features/country/worldMapPaths.ts",
-          "operation": "delete",
-          "description": "Delete the unused world map SVG path dataset now that map rendering is removed, ensuring nothing else imports it."
+          "path": "frontend/src/features/relationshipStatus/useSetRelationshipStatus.ts",
+          "operation": "modify",
+          "description": "Strengthen React Query refresh behavior after a successful status change: invalidate/refetch ['relationshipStatus'], ['currentUserProfile'], and partner/profile-related queries (including parameterized partner profile keys) so the dashboard display and AppLayout heart color update immediately."
+        }
+      ]
+    },
+    {
+      "id": "REQ-46",
+      "summary": "Add a Settings control for paired users to change an existing relationship status and show an English success toast after saving.",
+      "acceptanceCriteria": [
+        "In Settings, when the user is paired and a relationship status exists, a \"Change Relationship Status\" control is visible.",
+        "Invoking the control presents the existing relationship options (Friendship, Almost Something, Situationship, Relationship, Engaged, Married) and saves the selection.",
+        "On success, the UI shows a toast: \"Relationship status updated successfully 💛\" and the displayed status/heart color updates to match the new value.",
+        "If the user is not paired, the Settings status-change control is hidden or disabled in a way consistent with the rest of the Settings page patterns."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/features/relationshipStatus/relationshipStatusOptions.ts",
+          "operation": "create",
+          "description": "Create a shared, single source of truth for the existing relationship status options list used across the app (Friendship, Almost Something, Situationship, Relationship, Engaged, Married) to avoid duplication between the chooser and the new Settings control."
         },
         {
-          "path": "frontend/src/features/profile/ProfileSetupDialog.tsx",
+          "path": "frontend/src/features/relationshipStatus/ChooseRelationshipStatusView.tsx",
           "operation": "modify",
-          "description": "Ensure the profile setup flow continues to use the same country selector component (now map-free) and that no map-related helper text is present in this dialog. Verify the component's usage instructions before implementing."
+          "description": "Refactor to import the shared relationship status options from the new options module so the chooser and Settings use the same list (no new options introduced). Keep all user-facing text in English."
+        },
+        {
+          "path": "frontend/src/features/relationshipStatus/ChangeRelationshipStatusControl.tsx",
+          "operation": "create",
+          "description": "Add a Settings-ready UI control component that: shows \"Change Relationship Status\", presents the existing options for selection, calls the existing set-relationship-status mutation, and on success shows the toast \"Relationship status updated successfully 💛\". Use the app's existing UI primitives (without editing any immutable ui component files)."
         },
         {
           "path": "frontend/src/features/settings/SettingsView.tsx",
           "operation": "modify",
-          "description": "Ensure Settings > Country edit continues to use the same country selector component (now map-free) and that no map-related UI or text is introduced. Verify the component's usage instructions before implementing."
-        }
-      ]
-    },
-    {
-      "id": "REQ-42",
-      "summary": "Show the current user and partner country flags with a heart between them in the global header when authenticated, paired, and both countries are set.",
-      "acceptanceCriteria": [
-        "If the user is not authenticated, no flags/heart header element is shown.",
-        "If the user is authenticated but not paired, no flags/heart header element is shown.",
-        "If paired but either the current user or partner does not yet have a country saved (empty string), no flags/heart header element is shown.",
-        "If paired and both countries are present, the header shows: [current user flag] [heart] [partner flag].",
-        "Flags render correctly from ISO alpha-2 country codes (e.g., US -> 🇺🇸) without requiring new backend calls beyond existing profile/pairing/profile queries."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/features/country/flagEmoji.ts",
-          "operation": "create",
-          "description": "Add a small utility to convert ISO-3166-1 alpha-2 country codes into flag emojis (regional indicator symbols), returning an empty string or safe fallback when invalid. Verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/features/pairing/usePairingStatus.ts",
-          "operation": "modify",
-          "description": "Extend the pairing status hook to also expose partner profile data needed by the header (at minimum partner country code), reusing existing React Query cached calls to avoid redundant fetches. Verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/components/layout/AppLayout.tsx",
-          "operation": "modify",
-          "description": "Render a top-of-app header element that conditionally shows [current user flag] [heart] [partner flag] only when authenticated, paired, and both profiles have non-empty country codes; derive flags via the ISO alpha-2 -> emoji utility and do not add new backend calls beyond existing queries. Verify the component's usage instructions before implementing."
-        }
-      ]
-    },
-    {
-      "id": "REQ-43",
-      "summary": "Color the header heart icon based on the shared relationship status with a neutral default when absent.",
-      "acceptanceCriteria": [
-        "When relationship status is available, the heart color changes deterministically according to a defined mapping for the existing statuses used in the app (Friendship, Almost Something, Situationship, Relationship, Engaged, Married).",
-        "When relationship status is null/absent, the heart uses a neutral/default color and does not break layout.",
-        "All user-facing text remains in English (no new Spanish UI strings introduced)."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/features/relationshipStatus/relationshipStatusColors.ts",
-          "operation": "create",
-          "description": "Define a deterministic mapping from the app's existing relationship status strings (Friendship, Almost Something, Situationship, Relationship, Engaged, Married) to a small set of Tailwind-compatible color tokens/classes, including a neutral/default for null/unknown. Verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/components/layout/AppLayout.tsx",
-          "operation": "modify",
-          "description": "Apply the relationship-status color mapping to the heart icon displayed between the two flags, using a neutral/default color when status is null/absent, and avoid introducing any new non-English UI strings. Verify the component's usage instructions before implementing."
+          "description": "Wire the new \"Change Relationship Status\" control into Settings: show it only when the user is paired and a relationship status exists (otherwise hide/disable consistent with Settings patterns). Ensure it uses the same option list and the status/heart color updates via the existing query invalidations."
         }
       ]
     }

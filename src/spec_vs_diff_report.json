@@ -1,20 +1,68 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-14T22:07:58.914Z",
-  "summary": "Diff implements the requested UI changes: replaces map-based country selection with a searchable selector using the existing ISO alpha-2 dataset, and adds a global header element that conditionally shows user/partner flags with a relationship-status-colored heart between them.",
-  "missing_requirements": [],
-  "hallucinated_features": [],
-  "confidence": 0.82,
+  "generatedAt": "2026-02-14T22:16:21.984Z",
+  "summary": "The diff adds new frontend components/hooks for changing relationship status (including a Settings control and React Query invalidations), but the backend change required by REQ-44 is not evidenced in the provided `backend/main.mo` excerpt. The diff also introduces unrelated changes (country required in profile setup) and a backend migration removing `can_set_relationship_status`, which appears unrequested and may conflict with the initial-status permission requirement.",
+  "missing_requirements": [
+    {
+      "id": "REQ-44",
+      "requirement": "Backend `setRelationshipStatus` must allow only the invited user to set the initial status when unset, but allow either paired user to change it after it exists; persist to both partners; trap unauthorized callers with clear error.",
+      "reason": "The diff summary does not show any updated `setRelationshipStatus` logic in `backend/main.mo` (file is truncated before any relationship-status logic). Additionally, `backend/migration.mo` removes `can_set_relationship_status` from `UserProfile`, which is referenced by the requirement/AC, suggesting the required permission model may not be implemented as specified.",
+      "evidence": [
+        "backend/main.mo (truncated; no `setRelationshipStatus` logic shown)",
+        "backend/migration.mo (removes `can_set_relationship_status` field)"
+      ]
+    },
+    {
+      "id": "REQ-45",
+      "requirement": "Frontend must support both flows: initial status selection restricted to invited user (blocked with clear English error if not invited) and subsequent changes allowed by either paired user when status exists.",
+      "reason": "While `useSetRelationshipStatus` is updated and UI components call it, there is no evidence of a frontend-side block for the initial-status flow when the caller is not the invited user (`can_set_relationship_status == true`), nor any check of that flag in the shown frontend code.",
+      "evidence": [
+        "frontend/src/features/relationshipStatus/useSetRelationshipStatus.ts (no check for invited-user-only initial set)",
+        "frontend/src/features/relationshipStatus/ChooseRelationshipStatusView.tsx (calls mutation directly; no invited-user gating)"
+      ]
+    },
+    {
+      "id": "REQ-46",
+      "requirement": "In Settings, when paired and a relationship status exists, show a \"Change Relationship Status\" control; invoking shows the existing options and saves; show the specified success toast; hide/disable when not paired.",
+      "reason": "A Settings control component is added, but the visible control label does not match the AC wording (it renders a card titled \"Relationship Status\" with description \"Change your relationship status\" rather than explicitly \"Change Relationship Status\"). Also, `SettingsView.tsx` is truncated before showing conditional rendering logic, so it’s not fully evidenced that the control is only visible when paired and status exists or hidden/disabled when not paired.",
+      "evidence": [
+        "frontend/src/features/relationshipStatus/ChangeRelationshipStatusControl.tsx (CardTitle \"Relationship Status\", not \"Change Relationship Status\")",
+        "frontend/src/features/settings/SettingsView.tsx (truncated; conditional rendering not visible)"
+      ]
+    }
+  ],
+  "hallucinated_features": [
+    {
+      "description": "Backend migration introduced and `can_set_relationship_status` removed from user profile schema.",
+      "reason": "Not requested by the BuildRequest; additionally, it appears to conflict with requirements that explicitly depend on `can_set_relationship_status` for initial-status authorization.",
+      "evidence": [
+        "backend/migration.mo (defines OldUserProfile with `can_set_relationship_status` and NewUserProfile without it)",
+        "backend/main.mo (uses `(with migration = Migration.run)`)"
+      ]
+    },
+    {
+      "description": "Profile setup and settings were changed to require/select a country and added validations/toasts around country updates.",
+      "reason": "Not part of the relationship-status change request and called out as a non-goal to avoid redesigning unrelated areas beyond what is needed.",
+      "evidence": [
+        "frontend/src/features/profile/useSaveCallerUserProfile.ts (adds country required validation)",
+        "frontend/src/App.tsx (gates app on missing/empty country)",
+        "frontend/src/features/settings/SettingsView.tsx (country editing UI/toasts)"
+      ]
+    }
+  ],
+  "confidence": 0.74,
   "changed_files": [
+    "backend/main.mo",
+    "backend/migration.mo",
     "frontend-file-summaries.txt",
-    "frontend/src/components/layout/AppLayout.tsx",
-    "frontend/src/features/country/CountriesMapSelector.tsx",
-    "frontend/src/features/country/flagEmoji.ts",
-    "frontend/src/features/country/worldMapPaths.ts",
-    "frontend/src/features/pairing/usePairingStatus.ts",
-    "frontend/src/features/profile/ProfileSetupDialog.tsx",
-    "frontend/src/features/relationshipStatus/relationshipStatusColors.ts",
+    "frontend/src/App.tsx",
+    "frontend/src/features/profile/useSaveCallerUserProfile.ts",
+    "frontend/src/features/relationshipStatus/ChangeRelationshipStatusControl.tsx",
+    "frontend/src/features/relationshipStatus/ChooseRelationshipStatusView.tsx",
+    "frontend/src/features/relationshipStatus/relationshipStatusOptions.ts",
+    "frontend/src/features/relationshipStatus/useRelationshipStatusState.ts",
+    "frontend/src/features/relationshipStatus/useSetRelationshipStatus.ts",
     "frontend/src/features/settings/SettingsView.tsx",
     "project_state.json"
   ]

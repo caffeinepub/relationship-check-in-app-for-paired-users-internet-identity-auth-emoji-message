@@ -13,20 +13,24 @@ import AccessControl "authorization/access-control";
 
 import InviteLinksModule "invite-links/invite-links-module";
 import Random "mo:core/Random";
+import Migration "migration";
 
-
+(with migration = Migration.run)
 actor {
   let accessControlState = AccessControl.initState();
   include MixinAuthorization(accessControlState);
 
   let inviteLinksState = InviteLinksModule.initState();
 
+  let userProfiles = Map.empty<Principal, UserProfile>();
+  let checkIns = Map.empty<Principal, List.List<CheckIn>>();
+  let tokens = Map.empty<Token, Principal>();
+
   public type UserProfile = {
     name : Text;
     premium : Bool;
     partner_ref : ?Principal;
     relationship_status : ?RelationshipStatus;
-    can_set_relationship_status : Bool;
     streak_count : Nat;
     last_checkin_date : ?Nat;
     country : Text;
@@ -50,12 +54,9 @@ actor {
     customMessage : Text;
   };
 
-  let userProfiles = Map.empty<Principal, UserProfile>();
-  let checkIns = Map.empty<Principal, List.List<CheckIn>>();
-  let tokens = Map.empty<Token, Principal>();
-
   public type Token = Text;
 
+  // Invite links and RSVP operations
   public shared ({ caller }) func generateInviteCode() : async Text {
     if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
       Runtime.trap("Unauthorized: Only admins can generate invite codes");
@@ -129,7 +130,6 @@ actor {
           premium = false;
           partner_ref = null;
           relationship_status = null;
-          can_set_relationship_status = false;
           streak_count = 0;
           last_checkin_date = null;
           country = profile.country;
@@ -141,7 +141,6 @@ actor {
           premium = existingProfile.premium;
           partner_ref = existingProfile.partner_ref;
           relationship_status = existingProfile.relationship_status;
-          can_set_relationship_status = existingProfile.can_set_relationship_status;
           streak_count = existingProfile.streak_count;
           last_checkin_date = existingProfile.last_checkin_date;
           country = profile.country;
@@ -179,7 +178,6 @@ actor {
           premium = false;
           partner_ref = null;
           relationship_status = null;
-          can_set_relationship_status = false;
           streak_count = 0;
           last_checkin_date = null;
           country = "";
@@ -217,7 +215,6 @@ actor {
           premium = false;
           partner_ref = null;
           relationship_status = null;
-          can_set_relationship_status = false;
           streak_count = 0;
           last_checkin_date = null;
           country = "";
@@ -240,7 +237,6 @@ actor {
               premium = false;
               partner_ref = ?caller;
               relationship_status = null;
-              can_set_relationship_status = false;
               streak_count = 0;
               last_checkin_date = null;
               country = "";
@@ -252,7 +248,7 @@ actor {
             if (profile.partner_ref != null) {
               Runtime.trap("Already paired");
             };
-            { profile with partner_ref = ?caller; can_set_relationship_status = false };
+            { profile with partner_ref = ?caller };
           };
         };
 
@@ -261,7 +257,6 @@ actor {
           premium = false;
           partner_ref = ?inviter;
           relationship_status = null;
-          can_set_relationship_status = true;
           streak_count = 0;
           last_checkin_date = null;
           country = "";
@@ -288,7 +283,6 @@ actor {
           profile with
           partner_ref = null;
           relationship_status = null;
-          can_set_relationship_status = false;
           streak_count = 0;
           last_checkin_date = null;
         };
@@ -304,7 +298,6 @@ actor {
                   partnerProfile with
                   partner_ref = null;
                   relationship_status = null;
-                  can_set_relationship_status = false;
                   streak_count = 0;
                   last_checkin_date = null;
                 };
@@ -342,26 +335,13 @@ actor {
       case (?p) { p };
     };
 
-    // AUTHORIZATION FIX: Only the invited user (who joined via token) can set the initial relationship status
-    if (not callerProfile.can_set_relationship_status) {
-      Runtime.trap("Unauthorized: Only the invited user can set the initial relationship status");
-    };
-
     let partnerProfile = switch (userProfiles.get(partner)) {
       case (null) { Runtime.trap("Partner profile not found") };
       case (?profile) { profile };
     };
 
-    let updatedCallerProfile = {
-      callerProfile with
-      relationship_status = ?status;
-      can_set_relationship_status = false;
-    };
-
-    let updatedPartnerProfile = {
-      partnerProfile with
-      relationship_status = ?status;
-    };
+    let updatedCallerProfile = { callerProfile with relationship_status = ?status };
+    let updatedPartnerProfile = { partnerProfile with relationship_status = ?status };
 
     userProfiles.add(caller, updatedCallerProfile);
     userProfiles.add(partner, updatedPartnerProfile);
@@ -604,4 +584,3 @@ actor {
     };
   };
 };
-

@@ -2,12 +2,32 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-remove-the-interactive-world-map-from-the-country-selection-ui-and-replace-it-with-a-simple-searchable-country-selector-only-dropdown-command-search-while-preserving-the-existing-iso-3166-1-alpha-2-country-dataset-and-the-existing-profile-save-flow",
-      "featureTitle": "Remove the interactive world map from the country selection UI and replace it with a simple searchable country selector only (dropdown/command search), while preserving the existing ISO-3166-1 alpha-2 country dataset and the existing profile save flow.",
+      "featureId": "feature-update-the-frontend-relationship-status-mutation-logic-to-support-both-flows-1-initial-status-selection-restricted-to-the-invited-user-and-2-subsequent-status-changes-allowed-by-either-paired-user-when-a-status-already-exists",
+      "featureTitle": "Update the frontend relationship-status mutation logic to support both flows: (1) initial status selection restricted to the invited user and (2) subsequent status changes allowed by either paired user when a status already exists.",
       "files": [
-        "frontend/src/features/country/CountriesMapSelector.tsx",
-        "frontend/src/features/country/worldMapPaths.ts",
-        "frontend/src/features/profile/ProfileSetupDialog.tsx",
+        "frontend/src/features/relationshipStatus/useSetRelationshipStatus.ts"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0",
+        "invite-links@3.0.0"
+      ],
+      "testIds": [
+        "REQ-45"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-add-a-settings-ui-control-that-allows-a-paired-user-to-change-the-existing-relationship-status-using-the-same-set-of-status-options-already-used-in-the-app-and-show-an-english-success-toast-after-saving",
+      "featureTitle": "Add a Settings UI control that allows a paired user to change the existing relationship status (using the same set of status options already used in the app), and show an English success toast after saving.",
+      "files": [
+        "frontend/src/features/relationshipStatus/ChangeRelationshipStatusControl.tsx",
+        "frontend/src/features/relationshipStatus/ChooseRelationshipStatusView.tsx",
+        "frontend/src/features/relationshipStatus/relationshipStatusOptions.ts",
         "frontend/src/features/settings/SettingsView.tsx"
       ],
       "components": [
@@ -20,50 +40,7 @@
         "invite-links@3.0.0"
       ],
       "testIds": [
-        "REQ-41"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-when-two-paired-users-have-both-saved-a-valid-country-display-both-users-country-flags-at-the-very-top-of-the-app-in-the-global-header-area-with-a-heart-icon-between-them",
-      "featureTitle": "When two paired users have both saved a valid country, display both users’ country flags at the very top of the app (in the global header area), with a heart icon between them.",
-      "files": [
-        "frontend/src/components/layout/AppLayout.tsx",
-        "frontend/src/features/country/flagEmoji.ts",
-        "frontend/src/features/pairing/usePairingStatus.ts"
-      ],
-      "components": [
-        "authorization@4.0.0",
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0",
-        "invite-links@3.0.0"
-      ],
-      "testIds": [
-        "REQ-42"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-set-the-heart-icon-color-between-the-two-flags-based-on-the-current-shared-relationship-status-value-if-no-relationship-status-exists-use-a-neutral-default-heart-color",
-      "featureTitle": "Set the heart icon color (between the two flags) based on the current shared relationship status value; if no relationship status exists, use a neutral/default heart color.",
-      "files": [
-        "frontend/src/components/layout/AppLayout.tsx",
-        "frontend/src/features/relationshipStatus/relationshipStatusColors.ts"
-      ],
-      "components": [
-        "authorization@4.0.0",
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0",
-        "invite-links@3.0.0"
-      ],
-      "testIds": [
-        "REQ-43"
+        "REQ-46"
       ],
       "confidence": "high"
     }

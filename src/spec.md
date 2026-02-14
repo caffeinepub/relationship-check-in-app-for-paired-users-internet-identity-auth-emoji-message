@@ -1,12 +1,11 @@
 # Specification
 
 ## Summary
-**Goal:** Simplify country selection to a searchable selector and surface paired users’ countries in the global header with a relationship-status-colored heart.
+**Goal:** Let paired users change their relationship status after it has been initially set, while keeping the initial selection restricted to the invited user.
 
 **Planned changes:**
-- Remove the interactive world map from country selection and replace it with a searchable country selector (dropdown/command search) in both profile setup and Settings > Country edit, using the existing ISO-3166-1 alpha-2 dataset and existing save flow.
-- Update English helper text in country selection screens to remove any mention of interacting with a map.
-- Add a conditional global header element that shows the current user’s flag, a heart icon, and the partner’s flag only when authenticated, paired, and both users have saved countries.
-- Color the heart icon based on the current shared relationship status (Friendship, Almost Something, Situationship, Relationship, Engaged, Married), falling back to a neutral/default color when status is absent.
+- Backend: adjust relationship-status update rules so only the invited user can set the initial status, but either paired user can change it once a status exists; persist updates to both user profiles and return clear errors for unauthorized calls.
+- Frontend: update relationship-status mutation handling to support both initial-set and subsequent-change flows, including clear English errors and React Query invalidation/refetch so the status and heart color update immediately.
+- Frontend Settings: add a “Change Relationship Status” control visible only when paired and a status exists, reuse the existing status options, and show an English success toast after saving.
 
-**User-visible outcome:** Users pick their country via a searchable selector (no map). When paired and both have selected countries, the app header displays both flags with a heart between them whose color reflects the relationship status.
+**User-visible outcome:** If you’re paired and a relationship status is already set, you can change it from Settings and both profiles (and the heart/status UI) update immediately; if it’s not set yet, only the invited user can set it initially.

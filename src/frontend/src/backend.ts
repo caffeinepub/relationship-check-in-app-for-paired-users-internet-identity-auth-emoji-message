@@ -116,7 +116,6 @@ export interface UserProfile {
     relationship_status?: RelationshipStatus;
     streak_count: bigint;
     country: string;
-    can_set_relationship_status: boolean;
     premium: boolean;
     partner_ref?: Principal;
     name: string;
@@ -500,7 +499,6 @@ function from_candid_record_n5(_uploadFile: (file: ExternalBlob) => Promise<Uint
     relationship_status: [] | [_RelationshipStatus];
     streak_count: bigint;
     country: string;
-    can_set_relationship_status: boolean;
     premium: boolean;
     partner_ref: [] | [Principal];
     name: string;
@@ -509,7 +507,6 @@ function from_candid_record_n5(_uploadFile: (file: ExternalBlob) => Promise<Uint
     relationship_status?: RelationshipStatus;
     streak_count: bigint;
     country: string;
-    can_set_relationship_status: boolean;
     premium: boolean;
     partner_ref?: Principal;
     name: string;
@@ -519,7 +516,6 @@ function from_candid_record_n5(_uploadFile: (file: ExternalBlob) => Promise<Uint
         relationship_status: record_opt_to_undefined(from_candid_opt_n6(_uploadFile, _downloadFile, value.relationship_status)),
         streak_count: value.streak_count,
         country: value.country,
-        can_set_relationship_status: value.can_set_relationship_status,
         premium: value.premium,
         partner_ref: record_opt_to_undefined(from_candid_opt_n7(_uploadFile, _downloadFile, value.partner_ref)),
         name: value.name,
@@ -545,7 +541,6 @@ function to_candid_record_n12(_uploadFile: (file: ExternalBlob) => Promise<Uint8
     relationship_status?: RelationshipStatus;
     streak_count: bigint;
     country: string;
-    can_set_relationship_status: boolean;
     premium: boolean;
     partner_ref?: Principal;
     name: string;
@@ -554,7 +549,6 @@ function to_candid_record_n12(_uploadFile: (file: ExternalBlob) => Promise<Uint8
     relationship_status: [] | [_RelationshipStatus];
     streak_count: bigint;
     country: string;
-    can_set_relationship_status: boolean;
     premium: boolean;
     partner_ref: [] | [Principal];
     name: string;
@@ -564,7 +558,6 @@ function to_candid_record_n12(_uploadFile: (file: ExternalBlob) => Promise<Uint8
         relationship_status: value.relationship_status ? candid_some(value.relationship_status) : candid_none(),
         streak_count: value.streak_count,
         country: value.country,
-        can_set_relationship_status: value.can_set_relationship_status,
         premium: value.premium,
         partner_ref: value.partner_ref ? candid_some(value.partner_ref) : candid_none(),
         name: value.name,

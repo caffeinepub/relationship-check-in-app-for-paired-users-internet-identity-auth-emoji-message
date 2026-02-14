@@ -1,18 +1,10 @@
 import { useState } from 'react';
 import { useSetRelationshipStatus } from './useSetRelationshipStatus';
+import { RELATIONSHIP_OPTIONS } from './relationshipStatusOptions';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
-
-const RELATIONSHIP_OPTIONS = [
-  'Friendship',
-  'Almost Something',
-  'Situationship',
-  'Relationship',
-  'Engaged',
-  'Married',
-] as const;
 
 interface ChooseRelationshipStatusViewProps {
   onComplete: () => void;

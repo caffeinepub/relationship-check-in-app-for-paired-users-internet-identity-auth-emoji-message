@@ -14,6 +14,9 @@ import {
 import { useDisconnectPartner } from '../pairing/useDisconnectPartner';
 import { useGetCallerUserProfile } from '../profile/useGetCallerUserProfile';
 import { useSaveCallerUserProfile } from '../profile/useSaveCallerUserProfile';
+import { usePairingStatus } from '../pairing/usePairingStatus';
+import { useRelationshipStatusState } from '../relationshipStatus/useRelationshipStatusState';
+import { ChangeRelationshipStatusControl } from '../relationshipStatus/ChangeRelationshipStatusControl';
 import { CountriesMapSelector } from '../country/CountriesMapSelector';
 import { getCountryByCode } from '../country/countries';
 import { Loader2, UserX, Save } from 'lucide-react';
@@ -31,6 +34,8 @@ export function SettingsView({ onDisconnectSuccess }: SettingsViewProps) {
   const disconnectMutation = useDisconnectPartner();
   const { data: userProfile } = useGetCallerUserProfile();
   const saveProfileMutation = useSaveCallerUserProfile();
+  const { isPaired } = usePairingStatus();
+  const { hasStatus, statusValue } = useRelationshipStatusState();
 
   const currentCountry = userProfile?.country;
   const currentCountryName = currentCountry ? getCountryByCode(currentCountry)?.name : 'Not set';
@@ -145,6 +150,10 @@ export function SettingsView({ onDisconnectSuccess }: SettingsViewProps) {
           )}
         </CardContent>
       </Card>
+
+      {isPaired && hasStatus && statusValue && (
+        <ChangeRelationshipStatusControl currentStatus={statusValue} />
+      )}
 
       <Card>
         <CardHeader>

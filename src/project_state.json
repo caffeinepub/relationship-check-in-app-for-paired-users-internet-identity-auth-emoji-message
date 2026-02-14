@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 21,
+  "projectStateVersion": 23,
   "summary": "Relationship app for two connected users to do a daily emotional check-in (emoji selection + short message), with authentication, a Firebase/Firestore backend, premium tier for multiple check-ins per day, plus an Emotional Map page, a Settings option to remove/disconnect a partner, a shared relationship status chosen by the invited partner during pairing and displayed on Home, and a shared daily streak feature that increments only when both partners check in on the same day and is displayed on Home.",
   "architectural_notes": [
     "Use Firebase as the backend (authentication + data storage) for users, couple connections, and daily check-ins.",
@@ -236,6 +236,22 @@
         "REQ-43"
       ],
       "version": 1
+    },
+    {
+      "id": "feature-update-the-frontend-relationship-status-mutation-logic-to-support-both-flows-1-initial-status-selection-restricted-to-the-invited-user-and-2-subsequent-status-changes-allowed-by-either-paired-user-when-a-status-already-exists",
+      "title": "Update the frontend relationship-status mutation logic to support both flows: (1) initial status selection restricted to the invited user and (2) subsequent status changes allowed by either paired user when a status already exists.",
+      "reqIds": [
+        "REQ-45"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-a-settings-ui-control-that-allows-a-paired-user-to-change-the-existing-relationship-status-using-the-same-set-of-status-options-already-used-in-the-app-and-show-an-english-success-toast-after-saving",
+      "title": "Add a Settings UI control that allows a paired user to change the existing relationship status (using the same set of status options already used in the app), and show an English success toast after saving.",
+      "reqIds": [
+        "REQ-46"
+      ],
+      "version": 1
     }
   ],
   "new_feature_requests": [
@@ -443,6 +459,20 @@
       "id": "AR-41",
       "summary": "Replace interactive countries map with a simple country selector (e.g., dropdown/search), and when both partners have selected a country, display both users’ country flags at the top with a heart whose color depends on the relationship status",
       "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-44",
+      "summary": "Allow paired users to change/update the shared relationship status after initial selection (e.g., from Settings), saving the new value to both users and updating Home display.",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-45",
+      "summary": "Update the backend relationship-status update logic so that, after the initial relationship status has been set, either partner can change the relationship status later and the new value is saved to BOTH user profiles.",
+      "reqIds": [
+        "REQ-44"
+      ],
       "status": "pending"
     }
   ],

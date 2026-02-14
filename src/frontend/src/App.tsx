@@ -10,7 +10,6 @@ import { SettingsView } from './features/settings/SettingsView';
 import { PairingCard } from './features/pairing/PairingCard';
 import { usePairingStatus } from './features/pairing/usePairingStatus';
 import { useRelationshipStatusState } from './features/relationshipStatus/useRelationshipStatusState';
-import { ChooseRelationshipStatusView } from './features/relationshipStatus/ChooseRelationshipStatusView';
 import { Loader2, Heart, Map, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
@@ -20,7 +19,7 @@ export default function App() {
   const { identity, isInitializing } = useInternetIdentity();
   const { data: userProfile, isLoading: profileLoading, isFetched } = useGetCallerUserProfile();
   const { isPaired, isLoading: pairingLoading } = usePairingStatus();
-  const { isChooser, hasStatus, isLoading: statusLoading, isFetched: statusFetched } = useRelationshipStatusState();
+  const { hasStatus, isLoading: statusLoading } = useRelationshipStatusState();
   const [currentView, setCurrentView] = useState<PairedView>('dashboard');
 
   const isAuthenticated = !!identity;
@@ -101,15 +100,6 @@ export default function App() {
         <div className="flex min-h-[60vh] items-center justify-center">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
         </div>
-      </AppLayout>
-    );
-  }
-
-  // Paired but status not chosen yet - show chooser view if user is the designated chooser
-  if (isPaired && statusFetched && isChooser && !hasStatus) {
-    return (
-      <AppLayout>
-        <ChooseRelationshipStatusView onComplete={() => setCurrentView('dashboard')} />
       </AppLayout>
     );
   }
