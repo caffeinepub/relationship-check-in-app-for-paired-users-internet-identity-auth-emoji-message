@@ -1,79 +1,86 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Mandatory ISO country selection for onboarding and profile saves",
+  "title": "Replace map-based country selection with searchable selector and add paired flags + relationship-colored heart in header",
   "requirements": [
     {
-      "id": "REQ-37",
-      "summary": "Expand the frontend country dataset to a complete ISO 3166-1 alpha-2 list and ensure the selector can search/select any country.",
+      "id": "REQ-41",
+      "summary": "Replace the world map country picker with a simple searchable country selector while keeping the existing ISO alpha-2 dataset and profile save flow.",
       "acceptanceCriteria": [
-        "The exported `COUNTRIES` list includes all countries worldwide (complete ISO 3166-1 alpha-2 coverage, not a small subset).",
-        "The country list is unique by `code`, has non-empty `name` values, and remains sorted alphabetically by country name.",
-        "The searchable dropdown in `CountriesMapSelector` can find and select any country in the updated list."
+        "In the profile setup flow, users can select a country using a searchable selector without any map or SVG world map being rendered.",
+        "In Settings > Country edit, users can select a country using the same searchable selector without any map being rendered.",
+        "All countries remain selectable using the existing ISO-3166-1 alpha-2 dataset.",
+        "User-facing helper text is updated to remove any mention of clicking on a map (English only)."
       ],
       "file_operations": [
-        {
-          "path": "frontend/src/features/country/iso3166Alpha2.ts",
-          "operation": "create",
-          "description": "Add a complete static ISO 3166-1 alpha-2 dataset (code + English name) for all countries/territories intended for the app; keep it source-controlled and not fetched at runtime."
-        },
-        {
-          "path": "frontend/src/features/country/countries.ts",
-          "operation": "modify",
-          "description": "Update the exported `COUNTRIES` to be derived from the full ISO dataset; enforce uniqueness by `code`, non-empty names, and alphabetical sort by `name` before export; keep `getCountryByCode` behavior consistent."
-        },
         {
           "path": "frontend/src/features/country/CountriesMapSelector.tsx",
           "operation": "modify",
-          "description": "Ensure the searchable dropdown scales to the expanded list and reliably searches/filters across all entries (e.g., by ensuring CommandItem searchable value includes country name and optionally code); continue composing existing shadcn/ui components (Command/Popover/Button/etc.) and verify the component's usage instructions before implementing."
-        }
-      ]
-    },
-    {
-      "id": "REQ-38",
-      "summary": "Block normal app usage until an authenticated user has a non-empty country saved, reusing the existing profile setup dialog flow.",
-      "acceptanceCriteria": [
-        "If `getCallerUserProfile()` returns `null`, the existing profile setup dialog is shown (current behavior preserved).",
-        "If `getCallerUserProfile()` returns a profile whose `country` is missing/empty, the profile setup dialog is shown and the user cannot proceed into pairing/dashboard/settings views until a country is saved.",
-        "The Profile Setup submit button remains disabled until both a non-empty name and a selected country are present.",
-        "All user-facing validation/error messages introduced or changed for this requirement are in English."
-      ],
-      "file_operations": [
+          "description": "Remove all SVG/world-map rendering and any map-related helper text; keep only a searchable selector UI backed by the existing COUNTRIES ISO alpha-2 list. Use shadcn-ui composed primitives (Command, Popover, Button, etc.) to provide dropdown/command search; do not modify any files under frontend/src/components/ui. Verify the component's usage instructions before implementing."
+        },
         {
-          "path": "frontend/src/App.tsx",
-          "operation": "modify",
-          "description": "Extend the gating logic so authenticated users are forced into `ProfileSetupDialog` not only when the profile is null, but also when the fetched profile exists and `country` is missing/empty after trimming; ensure this gating occurs before pairing/dashboard/settings/relationship-status views are reachable."
+          "path": "frontend/src/features/country/worldMapPaths.ts",
+          "operation": "delete",
+          "description": "Delete the unused world map SVG path dataset now that map rendering is removed, ensuring nothing else imports it."
         },
         {
           "path": "frontend/src/features/profile/ProfileSetupDialog.tsx",
           "operation": "modify",
-          "description": "Update the dialog to support the 'missing country' case (e.g., prefill and/or lock in the existing saved name while requiring a valid country selection); keep submit disabled until `name.trim()` and a selected country are present; keep all user-facing messaging in English; continue composing existing shadcn/ui dialog/input/button components and verify the component's usage instructions before implementing."
-        }
-      ]
-    },
-    {
-      "id": "REQ-40",
-      "summary": "Ensure profile saves always submit a valid country when required and surface backend validation failures with a clear English message to select a country.",
-      "acceptanceCriteria": [
-        "The frontend mutation that saves a user profile does not send `country` as undefined/empty when the user is required to choose a country.",
-        "If the backend rejects a save due to missing country, the UI shows an English error message indicating country selection is required.",
-        "Settings country edit continues to prevent saving when no country is selected (current UX preserved)."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/features/profile/useSaveCallerUserProfile.ts",
-          "operation": "modify",
-          "description": "Normalize and always submit `country` as a non-empty trimmed string when provided/required (never undefined/empty); add a frontend-side guard that prevents invoking the backend save when country is missing in required flows, and propagate a clear error so UIs can display an English 'country is required' message."
-        },
-        {
-          "path": "frontend/src/features/profile/ProfileSetupDialog.tsx",
-          "operation": "modify",
-          "description": "Improve save error handling to detect and display a clear English message when a save fails due to missing/invalid country (e.g., 'Country selection is required.'); keep existing shadcn/ui composition and verify the component's usage instructions before implementing."
+          "description": "Ensure the profile setup flow continues to use the same country selector component (now map-free) and that no map-related helper text is present in this dialog. Verify the component's usage instructions before implementing."
         },
         {
           "path": "frontend/src/features/settings/SettingsView.tsx",
           "operation": "modify",
-          "description": "Preserve existing UX preventing saving with no selected country, and additionally surface a clear English error toast/message if a save attempt is rejected due to missing country; continue composing existing shadcn/ui components and verify the component's usage instructions before implementing."
+          "description": "Ensure Settings > Country edit continues to use the same country selector component (now map-free) and that no map-related UI or text is introduced. Verify the component's usage instructions before implementing."
+        }
+      ]
+    },
+    {
+      "id": "REQ-42",
+      "summary": "Show the current user and partner country flags with a heart between them in the global header when authenticated, paired, and both countries are set.",
+      "acceptanceCriteria": [
+        "If the user is not authenticated, no flags/heart header element is shown.",
+        "If the user is authenticated but not paired, no flags/heart header element is shown.",
+        "If paired but either the current user or partner does not yet have a country saved (empty string), no flags/heart header element is shown.",
+        "If paired and both countries are present, the header shows: [current user flag] [heart] [partner flag].",
+        "Flags render correctly from ISO alpha-2 country codes (e.g., US -> 🇺🇸) without requiring new backend calls beyond existing profile/pairing/profile queries."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/features/country/flagEmoji.ts",
+          "operation": "create",
+          "description": "Add a small utility to convert ISO-3166-1 alpha-2 country codes into flag emojis (regional indicator symbols), returning an empty string or safe fallback when invalid. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/features/pairing/usePairingStatus.ts",
+          "operation": "modify",
+          "description": "Extend the pairing status hook to also expose partner profile data needed by the header (at minimum partner country code), reusing existing React Query cached calls to avoid redundant fetches. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/components/layout/AppLayout.tsx",
+          "operation": "modify",
+          "description": "Render a top-of-app header element that conditionally shows [current user flag] [heart] [partner flag] only when authenticated, paired, and both profiles have non-empty country codes; derive flags via the ISO alpha-2 -> emoji utility and do not add new backend calls beyond existing queries. Verify the component's usage instructions before implementing."
+        }
+      ]
+    },
+    {
+      "id": "REQ-43",
+      "summary": "Color the header heart icon based on the shared relationship status with a neutral default when absent.",
+      "acceptanceCriteria": [
+        "When relationship status is available, the heart color changes deterministically according to a defined mapping for the existing statuses used in the app (Friendship, Almost Something, Situationship, Relationship, Engaged, Married).",
+        "When relationship status is null/absent, the heart uses a neutral/default color and does not break layout.",
+        "All user-facing text remains in English (no new Spanish UI strings introduced)."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/features/relationshipStatus/relationshipStatusColors.ts",
+          "operation": "create",
+          "description": "Define a deterministic mapping from the app's existing relationship status strings (Friendship, Almost Something, Situationship, Relationship, Engaged, Married) to a small set of Tailwind-compatible color tokens/classes, including a neutral/default for null/unknown. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/components/layout/AppLayout.tsx",
+          "operation": "modify",
+          "description": "Apply the relationship-status color mapping to the heart icon displayed between the two flags, using a neutral/default color when status is null/absent, and avoid introducing any new non-English UI strings. Verify the component's usage instructions before implementing."
         }
       ]
     }

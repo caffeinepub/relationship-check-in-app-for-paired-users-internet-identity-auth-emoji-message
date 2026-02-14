@@ -1,91 +1,75 @@
 {
   "kind": "build_request",
-  "title": "Require mandatory country selection and include all world countries",
+  "title": "Replace country world map with simple selector and show partner flags + relationship-colored heart in header",
   "priority": "normal",
   "requirements": [
     {
-      "id": "REQ-37",
-      "text": "Update the frontend country dataset to include all countries worldwide (use a complete ISO 3166-1 alpha-2 list), ensuring the selectable list used by the country selector contains every country/territory intended for the app.",
+      "id": "REQ-41",
+      "text": "Remove the interactive world map from the country selection UI and replace it with a simple searchable country selector only (dropdown/command search), while preserving the existing ISO-3166-1 alpha-2 country dataset and the existing profile save flow.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-user-1"
+          "msg-1"
         ],
         "quotes": [
-          "tienen que estar todos los paises del mundo y tiene que ser obligatorio seleccionar pais"
+          "quitale ese mapa solo pon que se seleccione pais"
         ]
       },
       "acceptanceCriteria": [
-        "The exported `COUNTRIES` list includes all countries worldwide (complete ISO 3166-1 alpha-2 coverage, not a small subset).",
-        "The country list is unique by `code`, has non-empty `name` values, and remains sorted alphabetically by country name.",
-        "The searchable dropdown in `CountriesMapSelector` can find and select any country in the updated list."
+        "In the profile setup flow, users can select a country using a searchable selector without any map or SVG world map being rendered.",
+        "In Settings > Country edit, users can select a country using the same searchable selector without any map being rendered.",
+        "All countries remain selectable using the existing ISO-3166-1 alpha-2 dataset.",
+        "User-facing helper text is updated to remove any mention of clicking on a map (English only)."
       ]
     },
     {
-      "id": "REQ-38",
-      "text": "Make country selection mandatory for onboarding: if an authenticated user does not yet have a country saved in their profile, the app must block normal app usage and present the profile setup flow until a valid country is selected and saved.",
+      "id": "REQ-42",
+      "text": "When two paired users have both saved a valid country, display both users’ country flags at the very top of the app (in the global header area), with a heart icon between them.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-user-1"
+          "msg-1"
         ],
         "quotes": [
-          "tienen que estar todos los paises del mundo y tiene que ser obligatorio seleccionar pais"
+          "cuando los dos usuarios escojan su pais que salga arriba de todo las baderas de los paises de los usuarios con un corazon"
         ]
       },
       "acceptanceCriteria": [
-        "If `getCallerUserProfile()` returns `null`, the existing profile setup dialog is shown (current behavior preserved).",
-        "If `getCallerUserProfile()` returns a profile whose `country` is missing/empty, the profile setup dialog is shown and the user cannot proceed into pairing/dashboard/settings views until a country is saved.",
-        "The Profile Setup submit button remains disabled until both a non-empty name and a selected country are present.",
-        "All user-facing validation/error messages introduced or changed for this requirement are in English."
+        "If the user is not authenticated, no flags/heart header element is shown.",
+        "If the user is authenticated but not paired, no flags/heart header element is shown.",
+        "If paired but either the current user or partner does not yet have a country saved (empty string), no flags/heart header element is shown.",
+        "If paired and both countries are present, the header shows: [current user flag] [heart] [partner flag].",
+        "Flags render correctly from ISO alpha-2 country codes (e.g., US -> 🇺🇸) without requiring new backend calls beyond existing profile/pairing/profile queries."
       ]
     },
     {
-      "id": "REQ-39",
-      "text": "Enforce mandatory country selection on the backend: reject profile saves that do not include a valid country value, so a user cannot persist a profile without selecting a country.",
-      "target": "backend",
-      "source": {
-        "messageIds": [
-          "msg-user-1"
-        ],
-        "quotes": [
-          "tienen que estar todos los paises del mundo y tiene que ser obligatorio seleccionar pais"
-        ]
-      },
-      "acceptanceCriteria": [
-        "`saveCallerUserProfile` traps/rejects when the incoming `country` value is null/absent or an empty string (after trimming).",
-        "When `saveCallerUserProfile` succeeds, the stored profile’s `country` is set to the provided value and remains persisted for future reads.",
-        "Existing server-managed fields (e.g., `premium`, `partner_ref`, `relationship_status`, `can_set_relationship_status`, `streak_count`, `last_checkin_date`) continue to be preserved as they are today when saving profiles."
-      ]
-    },
-    {
-      "id": "REQ-40",
-      "text": "Update the frontend profile save flow to always submit a selected country (no undefined/empty country values) and to surface backend validation failures with a clear English error message prompting the user to select a country.",
+      "id": "REQ-43",
+      "text": "Set the heart icon color (between the two flags) based on the current shared relationship status value; if no relationship status exists, use a neutral/default heart color.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-user-1"
+          "msg-1"
         ],
         "quotes": [
-          "tienen que estar todos los paises del mundo y tiene que ser obligatorio seleccionar pais"
+          "el color depende del estado de la relacion"
         ]
       },
       "acceptanceCriteria": [
-        "The frontend mutation that saves a user profile does not send `country` as undefined/empty when the user is required to choose a country.",
-        "If the backend rejects a save due to missing country, the UI shows an English error message indicating country selection is required.",
-        "Settings country edit continues to prevent saving when no country is selected (current UX preserved)."
+        "When relationship status is available, the heart color changes deterministically according to a defined mapping for the existing statuses used in the app (Friendship, Almost Something, Situationship, Relationship, Engaged, Married).",
+        "When relationship status is null/absent, the heart uses a neutral/default color and does not break layout.",
+        "All user-facing text remains in English (no new Spanish UI strings introduced)."
       ]
     }
   ],
   "constraints": [
-    "Do not edit files under `frontend/src/hooks/useInternetIdentity.ts`, `frontend/src/hooks/useInternetIdentity.tsx`, `frontend/src/hooks/useActor.ts`, `frontend/src/main.tsx`, or anything under `frontend/src/components/ui` (compose existing components instead).",
-    "Backend must remain a single Motoko actor with all logic in `backend/main.mo`.",
-    "Only add/modify `backend/migration.mo` if a state upgrade is strictly necessary (conditional migration policy)."
+    "Frontend must not modify any files under frontend/src/components/ui (shadcn components must be composed, not edited).",
+    "Frontend must not modify immutable paths listed in SYSTEM_CONTEXT (including frontend/src/hooks/useInternetIdentity.ts(x), frontend/src/hooks/useActor.ts, frontend/src/main.tsx).",
+    "Backend remains single-actor; do not introduce additional canisters/services."
   ],
   "nonGoals": [
-    "Creating or upgrading the interactive SVG world map to accurately include clickable shapes for every country (the requirement is that all countries are available for selection; the map can remain low-fidelity).",
-    "Adding geolocation/GPS-based auto-detection of country.",
-    "Adding third-party APIs or external datasets fetched at runtime."
+    "Do not reintroduce any interactive map or SVG world map for country selection.",
+    "Do not add new third-party integrations (maps, geolocation, external flag APIs).",
+    "Do not change backend data model or persistence for countries or relationship status (this is a UI/UX change only)."
   ],
   "imageRequirements": {
     "required": [],

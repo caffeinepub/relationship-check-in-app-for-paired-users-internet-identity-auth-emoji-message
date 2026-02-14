@@ -28,7 +28,9 @@ export function usePairingStatus() {
 
   return {
     partner: partnerQuery.data,
+    partnerProfile: partnerProfileQuery.data,
     partnerName: partnerProfileQuery.data?.name,
+    partnerCountry: partnerProfileQuery.data?.country,
     isPaired: !!partnerQuery.data,
     isLoading: actorFetching || partnerQuery.isLoading,
     isError: partnerQuery.isError,

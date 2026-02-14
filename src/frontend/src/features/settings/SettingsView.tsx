@@ -119,17 +119,17 @@ export function SettingsView({ onDisconnectSuccess }: SettingsViewProps) {
                 <Button
                   onClick={handleSaveCountry}
                   disabled={!selectedCountry || saveProfileMutation.isPending}
-                  className="flex-1 gap-2"
+                  className="flex-1"
                 >
                   {saveProfileMutation.isPending ? (
                     <>
-                      <Loader2 className="h-4 w-4 animate-spin" />
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                       Saving...
                     </>
                   ) : (
                     <>
-                      <Save className="h-4 w-4" />
-                      Save Country
+                      <Save className="mr-2 h-4 w-4" />
+                      Save
                     </>
                   )}
                 </Button>
@@ -149,23 +149,23 @@ export function SettingsView({ onDisconnectSuccess }: SettingsViewProps) {
       <Card>
         <CardHeader>
           <CardTitle>Partner Connection</CardTitle>
-          <CardDescription>Manage your partner connection settings</CardDescription>
+          <CardDescription>Manage your partner connection</CardDescription>
         </CardHeader>
         <CardContent>
           <Button
             variant="destructive"
             onClick={() => setShowConfirmDialog(true)}
             disabled={disconnectMutation.isPending}
-            className="gap-2"
+            className="w-full"
           >
             {disconnectMutation.isPending ? (
               <>
-                <Loader2 className="h-4 w-4 animate-spin" />
-                Removing...
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Removing Partner...
               </>
             ) : (
               <>
-                <UserX className="h-4 w-4" />
+                <UserX className="mr-2 h-4 w-4" />
                 Remove Partner
               </>
             )}
@@ -176,9 +176,10 @@ export function SettingsView({ onDisconnectSuccess }: SettingsViewProps) {
       <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Remove Partner Connection</AlertDialogTitle>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to remove your partner connection?
+              This will disconnect you from your partner. You'll need to pair again to reconnect.
+              All shared data will be reset.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

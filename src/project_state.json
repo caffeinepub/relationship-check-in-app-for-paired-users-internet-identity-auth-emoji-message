@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 19,
+  "projectStateVersion": 21,
   "summary": "Relationship app for two connected users to do a daily emotional check-in (emoji selection + short message), with authentication, a Firebase/Firestore backend, premium tier for multiple check-ins per day, plus an Emotional Map page, a Settings option to remove/disconnect a partner, a shared relationship status chosen by the invited partner during pairing and displayed on Home, and a shared daily streak feature that increments only when both partners check in on the same day and is displayed on Home.",
   "architectural_notes": [
     "Use Firebase as the backend (authentication + data storage) for users, couple connections, and daily check-ins.",
@@ -212,6 +212,30 @@
         "REQ-40"
       ],
       "version": 1
+    },
+    {
+      "id": "feature-remove-the-interactive-world-map-from-the-country-selection-ui-and-replace-it-with-a-simple-searchable-country-selector-only-dropdown-command-search-while-preserving-the-existing-iso-3166-1-alpha-2-country-dataset-and-the-existing-profile-save-flow",
+      "title": "Remove the interactive world map from the country selection UI and replace it with a simple searchable country selector only (dropdown/command search), while preserving the existing ISO-3166-1 alpha-2 country dataset and the existing profile save flow.",
+      "reqIds": [
+        "REQ-41"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-when-two-paired-users-have-both-saved-a-valid-country-display-both-users-country-flags-at-the-very-top-of-the-app-in-the-global-header-area-with-a-heart-icon-between-them",
+      "title": "When two paired users have both saved a valid country, display both users’ country flags at the very top of the app (in the global header area), with a heart icon between them.",
+      "reqIds": [
+        "REQ-42"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-set-the-heart-icon-color-between-the-two-flags-based-on-the-current-shared-relationship-status-value-if-no-relationship-status-exists-use-a-neutral-default-heart-color",
+      "title": "Set the heart icon color (between the two flags) based on the current shared relationship status value; if no relationship status exists, use a neutral/default heart color.",
+      "reqIds": [
+        "REQ-43"
+      ],
+      "version": 1
     }
   ],
   "new_feature_requests": [
@@ -378,12 +402,6 @@
       "status": "pending"
     },
     {
-      "id": "AR-33",
-      "summary": "Add a countries map UI and allow each user to select/save their country in their profile",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
       "id": "AR-34",
       "summary": "Extend the backend `UserProfile` data model to include a persisted country field for each user (e.g., `country : ?Text` storing an ISO country code or a stable country identifier), and expose it through existing profile query methods.",
       "reqIds": [
@@ -419,6 +437,12 @@
       "reqIds": [
         "REQ-39"
       ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-41",
+      "summary": "Replace interactive countries map with a simple country selector (e.g., dropdown/search), and when both partners have selected a country, display both users’ country flags at the top with a heart whose color depends on the relationship status",
+      "reqIds": [],
       "status": "pending"
     }
   ],

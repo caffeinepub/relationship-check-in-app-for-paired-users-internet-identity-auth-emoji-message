@@ -49,7 +49,7 @@ export function ProfileSetupDialog({ open }: ProfileSetupDialogProps) {
   return (
     <Dialog open={open}>
       <DialogContent 
-        className="sm:max-w-2xl max-h-[90vh] overflow-y-auto" 
+        className="sm:max-w-md max-h-[90vh] overflow-y-auto" 
         onInteractOutside={(e) => e.preventDefault()}
       >
         <form onSubmit={handleSubmit}>

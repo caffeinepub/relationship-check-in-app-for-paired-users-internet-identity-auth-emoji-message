@@ -1,13 +1,12 @@
 # Specification
 
 ## Summary
-**Goal:** Ensure the app supports selecting any country worldwide and enforces country selection as a mandatory part of user profile setup.
+**Goal:** Simplify country selection to a searchable selector and surface paired users’ countries in the global header with a relationship-status-colored heart.
 
 **Planned changes:**
-- Expand the frontend `COUNTRIES` dataset to a complete ISO 3166-1 alpha-2 list, ensuring unique codes, non-empty names, and alphabetical sorting.
-- Update the onboarding gating logic so authenticated users without a saved country are forced into the profile setup flow and cannot access normal app views until a country is selected and saved.
-- Keep the Profile Setup submit action disabled until both a non-empty name and a selected country are provided, with all validation/error messaging in English.
-- Enforce backend validation in `saveCallerUserProfile` to reject saves with missing/empty `country`, while preserving existing server-managed fields on save.
-- Update the frontend profile save flow to always submit a valid selected country when required and to display a clear English error message if the backend rejects a save due to missing country.
+- Remove the interactive world map from country selection and replace it with a searchable country selector (dropdown/command search) in both profile setup and Settings > Country edit, using the existing ISO-3166-1 alpha-2 dataset and existing save flow.
+- Update English helper text in country selection screens to remove any mention of interacting with a map.
+- Add a conditional global header element that shows the current user’s flag, a heart icon, and the partner’s flag only when authenticated, paired, and both users have saved countries.
+- Color the heart icon based on the current shared relationship status (Friendship, Almost Something, Situationship, Relationship, Engaged, Married), falling back to a neutral/default color when status is absent.
 
-**User-visible outcome:** Users can search and select from all world countries, and they must choose and save a country (and name) before they can use the app; attempts to save without a country are blocked with clear English feedback.
+**User-visible outcome:** Users pick their country via a searchable selector (no map). When paired and both have selected countries, the app header displays both flags with a heart between them whose color reflects the relationship status.

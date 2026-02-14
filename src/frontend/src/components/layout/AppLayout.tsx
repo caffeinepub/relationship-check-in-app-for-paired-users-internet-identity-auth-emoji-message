@@ -1,6 +1,10 @@
 import { LoginButton } from '../auth/LoginButton';
 import { useInternetIdentity } from '../../hooks/useInternetIdentity';
 import { usePairingStatus } from '../../features/pairing/usePairingStatus';
+import { useGetCallerUserProfile } from '../../features/profile/useGetCallerUserProfile';
+import { useRelationshipStatusState } from '../../features/relationshipStatus/useRelationshipStatusState';
+import { countryCodeToFlagEmoji } from '../../features/country/flagEmoji';
+import { getRelationshipStatusColors } from '../../features/relationshipStatus/relationshipStatusColors';
 import { Heart } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Toaster } from '@/components/ui/sonner';
@@ -12,28 +16,64 @@ interface AppLayoutProps {
 
 export function AppLayout({ children, showAuthButton = true }: AppLayoutProps) {
   const { identity } = useInternetIdentity();
-  const { isPaired, partnerName } = usePairingStatus();
+  const { isPaired, partnerName, partnerCountry } = usePairingStatus();
+  const { data: userProfile } = useGetCallerUserProfile();
+  const { relationshipStatus } = useRelationshipStatusState();
+  
   const isAuthenticated = !!identity;
+  const userCountry = userProfile?.country;
+
+  // Show flags only when authenticated, paired, and both countries are set
+  const showFlags = isAuthenticated && 
+                    isPaired && 
+                    userCountry && 
+                    userCountry.trim() !== '' && 
+                    partnerCountry && 
+                    partnerCountry.trim() !== '';
+
+  const userFlag = userCountry ? countryCodeToFlagEmoji(userCountry) : '';
+  const partnerFlag = partnerCountry ? countryCodeToFlagEmoji(partnerCountry) : '';
+  
+  const heartColors = getRelationshipStatusColors(relationshipStatus?.status);
 
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b border-border/40 bg-card/50 backdrop-blur supports-[backdrop-filter]:bg-card/30">
         <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
-                <Heart className="h-5 w-5 text-primary fill-primary" />
+          <div className="flex flex-col gap-3">
+            {/* Flags and Heart Row */}
+            {showFlags && (
+              <div className="flex items-center justify-center gap-3">
+                <span className="text-4xl" role="img" aria-label="Your country flag">
+                  {userFlag}
+                </span>
+                <Heart 
+                  className={`h-6 w-6 ${heartColors.textColor} ${heartColors.fillColor}`}
+                  aria-label="Relationship heart"
+                />
+                <span className="text-4xl" role="img" aria-label="Partner country flag">
+                  {partnerFlag}
+                </span>
               </div>
-              <div>
-                <h1 className="text-xl font-bold tracking-tight">HeartSync</h1>
-                {isAuthenticated && isPaired && partnerName && (
-                  <Badge variant="secondary" className="text-xs mt-0.5">
-                    Connected with {partnerName}
-                  </Badge>
-                )}
+            )}
+
+            {/* Brand and Auth Row */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
+                  <Heart className="h-5 w-5 text-primary fill-primary" />
+                </div>
+                <div>
+                  <h1 className="text-xl font-bold tracking-tight">HeartSync</h1>
+                  {isAuthenticated && isPaired && partnerName && (
+                    <Badge variant="secondary" className="text-xs mt-0.5">
+                      Connected with {partnerName}
+                    </Badge>
+                  )}
+                </div>
               </div>
+              {showAuthButton && <LoginButton />}
             </div>
-            {showAuthButton && <LoginButton />}
           </div>
         </div>
       </header>
