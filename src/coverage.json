@@ -1,0 +1,82 @@
+{
+  "kind": "coverage_report",
+  "version": "1.0",
+  "generatedAt": "2026-02-14T19:44:08.625Z",
+  "sources": {
+    "buildRequest": true,
+    "implementationPlan": true
+  },
+  "requirements": {
+    "total": 5,
+    "implemented": 2,
+    "items": [
+      {
+        "id": "REQ-10",
+        "summary": "Provide a backend mechanism to set or change a user’s premium status without adding external payment integrations.",
+        "status": "unknown",
+        "plannedFiles": [],
+        "matchedFiles": []
+      },
+      {
+        "id": "REQ-11",
+        "summary": "Update the frontend check-in composer UX to support premium multiple check-ins per day: free users see a completed/limit state after 1 check-in; premium users can continue to submit additional check-ins the same day.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/features/profile/useHasPremium.ts",
+          "frontend/src/features/checkins/CheckInComposer.tsx",
+          "frontend/src/features/checkins/useSubmitCheckIn.ts"
+        ],
+        "matchedFiles": [
+          "frontend/src/features/profile/useHasPremium.ts",
+          "frontend/src/features/checkins/CheckInComposer.tsx"
+        ]
+      },
+      {
+        "id": "REQ-12",
+        "summary": "Update the “Today’s Status” display to handle multiple check-ins per user in a single day by showing the most recent check-in per person and optionally the count of check-ins submitted today.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/features/checkins/TodayStatusCard.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/features/checkins/TodayStatusCard.tsx"
+        ]
+      },
+      {
+        "id": "REQ-8",
+        "summary": "Add a persistent premium flag to the backend user data model and expose a query method to retrieve the current caller’s premium status.",
+        "status": "unknown",
+        "plannedFiles": [],
+        "matchedFiles": []
+      },
+      {
+        "id": "REQ-9",
+        "summary": "Update backend check-in submission rules so free users can submit at most 1 check-in per day, while premium users can submit multiple check-ins per day.",
+        "status": "unknown",
+        "plannedFiles": [],
+        "matchedFiles": []
+      }
+    ]
+  },
+  "changedFiles": [
+    "backend/main.mo",
+    "backend/migration.mo",
+    "build-request.json",
+    "build-template/README.md",
+    "feature_evidence.json",
+    "frontend-file-summaries.txt",
+    "frontend-implementation-plan.json",
+    "frontend/src/backend.d.ts",
+    "frontend/src/backend.ts",
+    "frontend/src/declarations/backend.did.d.ts",
+    "frontend/src/declarations/backend.did.js",
+    "frontend/src/features/checkins/CheckInComposer.tsx",
+    "frontend/src/features/checkins/TodayStatusCard.tsx",
+    "frontend/src/features/profile/ProfileSetupDialog.tsx",
+    "frontend/src/features/profile/useHasPremium.ts",
+    "project_state.json",
+    "scratch/component-selection.json",
+    "spec.md",
+    "spec_vs_diff_report.json"
+  ]
+}

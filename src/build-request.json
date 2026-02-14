@@ -1,0 +1,124 @@
+{
+  "kind": "build_request",
+  "title": "Add premium gating for multiple daily check-ins (free: 1/day, premium: multiple/day)",
+  "priority": "normal",
+  "requirements": [
+    {
+      "id": "REQ-8",
+      "text": "Add a persistent premium flag to the backend user data model and expose a query method to retrieve the current caller’s premium status.",
+      "target": "backend",
+      "source": {
+        "messageIds": [
+          "msg-9",
+          "msg-12"
+        ],
+        "quotes": [
+          "i want more that one check in in the app for a day but that option is premium",
+          "yes modify"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Backend stores a premium boolean per Principal (default = false for users without an explicit setting).",
+        "A new query method exists to fetch the caller’s premium status (returns false by default).",
+        "All methods enforce existing authorization checks (only authenticated users can read their own premium status)."
+      ]
+    },
+    {
+      "id": "REQ-9",
+      "text": "Update backend check-in submission rules so free users can submit at most 1 check-in per day, while premium users can submit multiple check-ins per day.",
+      "target": "backend",
+      "source": {
+        "messageIds": [
+          "msg-9",
+          "msg-12"
+        ],
+        "quotes": [
+          "i want more that one check in in the app for a day but that option is premium",
+          "yes modify"
+        ]
+      },
+      "acceptanceCriteria": [
+        "When a non-premium user calls submitCheckIn twice on the same day, the second call traps/rejects with a clear error message indicating the daily limit.",
+        "When a premium user calls submitCheckIn multiple times on the same day, all submissions succeed and are stored.",
+        "Existing behavior remains unchanged for pairing/auth checks (must be paired, must be authorized)."
+      ]
+    },
+    {
+      "id": "REQ-10",
+      "text": "Provide a backend mechanism to set or change a user’s premium status without adding external payment integrations.",
+      "target": "backend",
+      "source": {
+        "messageIds": [
+          "msg-6",
+          "msg-9",
+          "msg-12"
+        ],
+        "quotes": [
+          "how can i put premium options",
+          "i want more that one check in in the app for a day but that option is premium",
+          "yes modify"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Backend exposes an update method to change premium status for a Principal under a controlled rule (e.g., admin-only or self-service), documented via method name and behavior.",
+        "Non-authorized callers cannot change another user’s premium status.",
+        "No third-party payment provider integration is added as part of this change."
+      ]
+    },
+    {
+      "id": "REQ-11",
+      "text": "Update the frontend check-in composer UX to support premium multiple check-ins per day: free users see a completed/limit state after 1 check-in; premium users can continue to submit additional check-ins the same day.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-9",
+          "msg-12"
+        ],
+        "quotes": [
+          "i want more that one check in in the app for a day but that option is premium",
+          "yes modify"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Frontend fetches and uses the caller’s premium status (via a new React Query hook) to decide whether to block additional submissions.",
+        "For non-premium users who already checked in today, the UI indicates the daily limit and includes clear English text that multiple same-day check-ins are a premium feature.",
+        "For premium users, the composer remains available even if they already checked in today and allows submitting again.",
+        "Submitting an additional premium check-in invalidates today/history queries and the UI updates accordingly."
+      ]
+    },
+    {
+      "id": "REQ-12",
+      "text": "Update the “Today’s Status” display to handle multiple check-ins per user in a single day by showing the most recent check-in per person and optionally the count of check-ins submitted today.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-9",
+          "msg-12"
+        ],
+        "quotes": [
+          "i want more that one check in in the app for a day but that option is premium",
+          "yes modify"
+        ]
+      },
+      "acceptanceCriteria": [
+        "If multiple check-ins exist for the current user or partner today, the status card shows the latest one (by timestamp).",
+        "The UI does not break when there are 0, 1, or multiple check-ins for either person.",
+        "Any new user-facing text is in English and consistent with the existing app tone."
+      ]
+    }
+  ],
+  "constraints": [
+    "Backend must remain a single Motoko actor (all logic in backend/main.mo).",
+    "Do not edit files under frontend/src/components/ui or any other immutablePaths listed in SYSTEM_CONTEXT; compose them instead.",
+    "Do not add external databases or non-Internet-Computer backends."
+  ],
+  "nonGoals": [
+    "Implementing Stripe payments or subscription billing flows.",
+    "Adding third-party authentication beyond Internet Identity.",
+    "Changing the existing emoji set or message length limits unless required for the premium gating."
+  ],
+  "imageRequirements": {
+    "required": [],
+    "edits": []
+  }
+}

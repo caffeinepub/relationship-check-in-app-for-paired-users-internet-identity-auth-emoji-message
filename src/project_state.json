@@ -1,0 +1,145 @@
+{
+  "schemaVersion": "1.0.0",
+  "projectStateVersion": 5,
+  "summary": "Relationship app for two connected users to do a daily emotional check-in (emoji selection + short message), with authentication, a Firebase backend, and a premium tier that unlocks multiple check-ins per day (free users limited to 1/day).",
+  "architectural_notes": [
+    "Use Firebase as the backend (authentication + data storage) for users, couple connections, and daily check-ins.",
+    "Introduce a per-user premium entitlement flag (e.g., isPremium/subscriptionStatus) and enforce check-in limits based on entitlement (free: 1/day; premium: >1/day)."
+  ],
+  "known_issues": [],
+  "isFixRequest": false,
+  "existing_features": [
+    {
+      "id": "feature-implement-authentication-using-internet-identity-so-a-user-can-sign-in-sign-out-and-the-app-can-identify-the-current-user-principal",
+      "title": "Implement authentication using Internet Identity so a user can sign in, sign out, and the app can identify the current user principal.",
+      "reqIds": [
+        "REQ-1"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-a-secure-pairing-connection-flow-where-one-user-can-generate-an-invite-code-or-link-token-and-a-second-user-can-join-using-that-code-resulting-in-a-2-person-couple-connection",
+      "title": "Implement a secure pairing/connection flow where one user can generate an invite code (or link token) and a second user can join using that code, resulting in a 2-person couple connection.",
+      "reqIds": [
+        "REQ-3"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-the-daily-emotional-check-in-feature-allow-a-paired-user-to-select-an-emoji-from-a-fixed-set-and-enter-a-short-message-then-submit-it-as-that-day-s-check-in",
+      "title": "Implement the daily emotional check-in feature: allow a paired user to select an emoji (from a fixed set) and enter a short message, then submit it as that day’s check-in.",
+      "reqIds": [
+        "REQ-4"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-provide-a-couple-dashboard-that-shows-both-partners-most-recent-check-ins-and-a-simple-history-view-e-g-last-7-30-days-with-emoji-message-date",
+      "title": "Provide a couple dashboard that shows both partners’ most recent check-ins and a simple history view (e.g., last 7–30 days) with emoji + message + date.",
+      "reqIds": [
+        "REQ-5"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-a-coherent-distinctive-visual-theme-for-the-app-colors-typography-spacing-components-and-apply-it-consistently-across-login-pairing-check-in-and-history-screens-avoid-blue-purple-as-primary-colors",
+      "title": "Add a coherent, distinctive visual theme for the app (colors, typography, spacing, components) and apply it consistently across login, pairing, check-in, and history screens (avoid blue/purple as primary colors).",
+      "reqIds": [
+        "REQ-7"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-frontend-check-in-composer-ux-to-support-premium-multiple-check-ins-per-day-free-users-see-a-completed-limit-state-after-1-check-in-premium-users-can-continue-to-submit-additional-check-ins-the-same-day",
+      "title": "Update the frontend check-in composer UX to support premium multiple check-ins per day: free users see a completed/limit state after 1 check-in; premium users can continue to submit additional check-ins the same day.",
+      "reqIds": [
+        "REQ-11"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-today-s-status-display-to-handle-multiple-check-ins-per-user-in-a-single-day-by-showing-the-most-recent-check-in-per-person-and-optionally-the-count-of-check-ins-submitted-today",
+      "title": "Update the “Today’s Status” display to handle multiple check-ins per user in a single day by showing the most recent check-in per person and optionally the count of check-ins submitted today.",
+      "reqIds": [
+        "REQ-12"
+      ],
+      "version": 1
+    }
+  ],
+  "new_feature_requests": [
+    {
+      "id": "AR-1",
+      "summary": "User authentication (sign up/login/logout) for the relationship app",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-2",
+      "summary": "Pairing/connection flow for two users to connect as a couple",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-3",
+      "summary": "Daily emotional check-in feature with emoji selection and short message",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-4",
+      "summary": "Firebase backend integration (data storage/sync for users, pairing, and check-ins)",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-6",
+      "summary": "Create backend data models and persistence for relationship pairing and daily check-ins using the single Motoko actor (no external database).",
+      "reqIds": [
+        "REQ-2"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-10",
+      "summary": "Define and implement backend query/update methods needed by the UI for: getting current user profile, pairing status, creating invite token, joining via token, submitting today’s check-in, fetching today’s check-ins, and fetching recent history.",
+      "reqIds": [
+        "REQ-6"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-11",
+      "summary": "Add premium gating for multiple daily check-ins: free users limited to 1 check-in/day, premium users can submit more than one per day (requires user premium status field + enforcement in UI/backend).",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-12",
+      "summary": "Add a persistent premium flag to the backend user data model and expose a query method to retrieve the current caller’s premium status.",
+      "reqIds": [
+        "REQ-8"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-13",
+      "summary": "Update backend check-in submission rules so free users can submit at most 1 check-in per day, while premium users can submit multiple check-ins per day.",
+      "reqIds": [
+        "REQ-9"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-14",
+      "summary": "Provide a backend mechanism to set or change a user’s premium status without adding external payment integrations.",
+      "reqIds": [
+        "REQ-10"
+      ],
+      "status": "pending"
+    }
+  ],
+  "gameProjectType": "none",
+  "projectName": "Relationship check-in app for paired users (Internet Identity auth, emoji + message daily check-ins)",
+  "clarification_mode": "instant",
+  "clarification_rounds": 0
+}

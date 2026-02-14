@@ -1,0 +1,37 @@
+{
+  "kind": "spec_vs_diff_report",
+  "version": "1.0",
+  "generatedAt": "2026-02-14T19:44:08.622Z",
+  "summary": "Premium flag and status query appear implemented on backend (with migration) and consumed on frontend via a new React Query hook; frontend composer and Today’s Status UI were updated to handle premium gating and multiple check-ins display. However, evidence is insufficient in the provided diff summary to confirm backend enforcement of the 1/day limit for free users and query invalidation behavior after additional premium submissions.",
+  "missing_requirements": [
+    {
+      "id": "REQ-9",
+      "requirement": "Update backend check-in submission rules so free users can submit at most 1 check-in per day, while premium users can submit multiple check-ins per day.",
+      "reason": "The diff snippet for backend/main.mo is truncated before any submitCheckIn logic; no shown changes demonstrate enforcing a 1/day limit for non-premium users or allowing multiple submissions for premium users with a clear rejection message for the second free submission.",
+      "evidence": [
+        "backend/main.mo (truncated; submitCheckIn changes not shown)"
+      ]
+    },
+    {
+      "id": "REQ-11",
+      "requirement": "Submitting an additional premium check-in invalidates today/history queries and the UI updates accordingly.",
+      "reason": "While the composer now blocks non-premium users and uses a new premium-status query hook, the diff summary shows no modifications to the submit mutation hook (useSubmitCheckIn) or any explicit invalidation of today/history queries on success; therefore this AC cannot be confirmed from the provided diff.",
+      "evidence": [
+        "frontend/src/features/checkins/CheckInComposer.tsx (truncated; no query invalidation shown)",
+        "frontend-file-summaries.txt (useSubmitCheckIn listed but not shown as modified)"
+      ]
+    }
+  ],
+  "hallucinated_features": [],
+  "confidence": 0.62,
+  "changed_files": [
+    "backend/main.mo",
+    "backend/migration.mo",
+    "frontend-file-summaries.txt",
+    "frontend/src/features/checkins/CheckInComposer.tsx",
+    "frontend/src/features/checkins/TodayStatusCard.tsx",
+    "frontend/src/features/profile/ProfileSetupDialog.tsx",
+    "frontend/src/features/profile/useHasPremium.ts",
+    "project_state.json"
+  ]
+}

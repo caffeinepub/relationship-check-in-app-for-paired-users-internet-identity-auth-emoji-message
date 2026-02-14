@@ -1,0 +1,23 @@
+{
+  "frontend/src/App.tsx": "Main application component that orchestrates authentication flow, profile setup, pairing status, and dashboard views with proper loading states and conditional rendering.",
+  "frontend/src/components/auth/LoginButton.tsx": "Login/logout button component that uses Internet Identity hook and clears query cache on logout.",
+  "frontend/src/components/layout/AppLayout.tsx": "Reusable layout wrapper with header (brand, pairing status badge), main content area, and footer with attribution.",
+  "frontend/src/features/profile/useGetCallerUserProfile.ts": "React Query hook to fetch current user profile with proper actor dependency handling to prevent modal flash.",
+  "frontend/src/features/profile/ProfileSetupDialog.tsx": "Modal dialog for first-time profile setup that prompts user for display name and saves to backend with default premium status set to false, with prevented outside interaction to ensure completion.",
+  "frontend/src/features/pairing/usePairingStatus.ts": "React Query hook that fetches partner principal and profile to determine pairing status.",
+  "frontend/src/features/pairing/PairingCard.tsx": "Two-column card UI for generating invite codes and joining with partner's code.",
+  "frontend/src/features/pairing/useInviteToken.ts": "React Query mutation hook to generate invite tokens with local state management.",
+  "frontend/src/features/pairing/useJoinWithToken.ts": "React Query mutation hook to join with invite token and invalidate pairing queries on success.",
+  "frontend/src/features/checkins/constants.ts": "Defines fixed emoji set (12 emojis with labels) and max message length constant.",
+  "frontend/src/features/checkins/useTodayCheckIns.ts": "React Query hook to fetch today's check-ins for both partners.",
+  "frontend/src/features/checkins/useSubmitCheckIn.ts": "React Query mutation hook to submit daily check-in with emoji and message.",
+  "frontend/src/features/checkins/useCheckInHistory.ts": "React Query hook to fetch check-in history with configurable limit.",
+  "frontend/src/features/checkins/CheckInComposer.tsx": "Form component for submitting daily check-in with emoji picker, message textarea, and premium gating that blocks non-premium users after their first daily check-in while allowing premium users unlimited submissions.",
+  "frontend/src/features/checkins/TodayStatusCard.tsx": "Card displaying today's check-in status for both user and partner, showing the latest check-in per person with optional count badges when multiple check-ins exist for the same day.",
+  "frontend/src/features/dashboard/CheckInHistoryList.tsx": "List component rendering historical check-ins with date, author badge, emoji, and message.",
+  "frontend/src/features/dashboard/DashboardView.tsx": "Main dashboard with tabs for today's check-in and history views.",
+  "frontend/src/index.css": "Global styles with warm coral/terracotta OKLCH color system for light and dark modes, avoiding blue/purple palette.",
+  "frontend/tailwind.config.js": "Tailwind configuration with custom color tokens, Inter font family, and soft shadow utilities.",
+  "frontend/src/hooks/useQueries.ts": "Empty placeholder file with comment explaining feature-based query organization.",
+  "frontend/src/features/profile/useHasPremium.ts": "React Query hook that fetches the caller's premium status from the backend with proper actor dependency handling."
+}

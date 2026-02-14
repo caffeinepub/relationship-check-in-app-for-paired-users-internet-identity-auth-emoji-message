@@ -1,0 +1,50 @@
+{
+  "kind": "implementation_plan",
+  "version": "1.0",
+  "title": "Premium gating UX for multiple daily check-ins",
+  "requirements": [
+    {
+      "id": "REQ-11",
+      "summary": "Fetch and apply premium status in the check-in composer so free users are limited to 1/day while premium users can submit multiple times per day.",
+      "acceptanceCriteria": [
+        "Frontend fetches and uses the caller’s premium status (via a new React Query hook) to decide whether to block additional submissions.",
+        "For non-premium users who already checked in today, the UI indicates the daily limit and includes clear English text that multiple same-day check-ins are a premium feature.",
+        "For premium users, the composer remains available even if they already checked in today and allows submitting again.",
+        "Submitting an additional premium check-in invalidates today/history queries and the UI updates accordingly."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/features/profile/useHasPremium.ts",
+          "operation": "create",
+          "description": "Add a React Query hook that calls the backend actor capability hasPremium() and exposes loading/error states for premium gating decisions."
+        },
+        {
+          "path": "frontend/src/features/checkins/CheckInComposer.tsx",
+          "operation": "modify",
+          "description": "Use useHasPremium (new hook) alongside useTodayCheckIns to compute whether the user is blocked (free + already checked in) vs allowed (premium). Update the blocked UI state copy to explicitly mention the daily limit and that multiple same-day check-ins are a premium feature; keep the composer form available for premium users even when they already checked in today; ensure handleSubmit only blocks when user is non-premium and already checked in today."
+        },
+        {
+          "path": "frontend/src/features/checkins/useSubmitCheckIn.ts",
+          "operation": "modify",
+          "description": "Confirm cache invalidation covers repeated premium submissions by continuing to invalidate today and history queries after each successful submit; if query keys change/expand due to premium gating hook usage, update invalidation to keep the UI consistent."
+        }
+      ]
+    },
+    {
+      "id": "REQ-12",
+      "summary": "Update Today’s Status UI to show the most recent check-in per person (and optionally count) when multiple check-ins occur in one day.",
+      "acceptanceCriteria": [
+        "If multiple check-ins exist for the current user or partner today, the status card shows the latest one (by timestamp).",
+        "The UI does not break when there are 0, 1, or multiple check-ins for either person.",
+        "Any new user-facing text is in English and consistent with the existing app tone."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/features/checkins/TodayStatusCard.tsx",
+          "operation": "modify",
+          "description": "Change selection logic from first match to 'latest by timestamp' for both the current user and partner. Optionally compute per-person counts from todayCheckIns and display a small count label/badge (e.g., '2 check-ins') while keeping the existing layout stable for 0/1/many states."
+        }
+      ]
+    }
+  ]
+}
