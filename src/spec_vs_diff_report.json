@@ -1,29 +1,31 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-14T21:37:33.366Z",
-  "summary": "REQ-31 appears implemented: the AppLayout footer now only renders “Created by Angelica Arboleda”, with no visible “© {year} HeartSync. Built with … using caffeine.ai” text, heart icon, or caffeine.ai link. Two additional metadata/state files were modified that were not requested by the BuildRequest.",
-  "missing_requirements": [],
-  "hallucinated_features": [
+  "generatedAt": "2026-02-14T21:46:05.310Z",
+  "summary": "Backend and frontend changes add a new `country` field to `UserProfile`, include a migration that initializes `country = null` for existing stored profiles, and add a map + dropdown-based country selector used during profile setup and in Settings. However, the diff summary does not provide enough evidence that `saveCallerUserProfile` preserves all server-managed fields as required.",
+  "missing_requirements": [
     {
-      "description": "Updated/modified frontend file summary metadata content not requested by the BuildRequest.",
-      "reason": "BuildRequest only asked to remove a specific footer attribution line; it did not request regenerating or editing summary metadata files.",
+      "id": "REQ-33",
+      "requirement": "Update `saveCallerUserProfile(profile : UserProfile)` so saving cannot overwrite server-managed/pairing-related fields; preserve `premium`, `partner_ref`, `relationship_status`, `can_set_relationship_status`, `streak_count`, and `last_checkin_date` while allowing updates to user-editable fields (`name`, `country`).",
+      "reason": "`backend/main.mo` is truncated right when `saveCallerUserProfile` begins, so there is no visible evidence that it merges/preserves the listed fields instead of accepting the caller-provided values. The frontend mutation also constructs a `UserProfile` with potentially destructive defaults (e.g., `premium: false`, `streak_count: 0`), making the backend-side preservation logic essential but not verifiable from the provided diff.",
       "evidence": [
-        "frontend-file-summaries.txt"
-      ]
-    },
-    {
-      "description": "Updated/modified project state metadata not requested by the BuildRequest.",
-      "reason": "BuildRequest did not request any changes to project state tracking/metadata—only a UI footer text removal.",
-      "evidence": [
-        "project_state.json"
+        "backend/main.mo (truncated at `saveCallerUserProfile`)",
+        "frontend/src/features/profile/useSaveCallerUserProfile.ts"
       ]
     }
   ],
-  "confidence": 0.84,
+  "hallucinated_features": [],
+  "confidence": 0.62,
   "changed_files": [
+    "backend/main.mo",
+    "backend/migration.mo",
     "frontend-file-summaries.txt",
-    "frontend/src/components/layout/AppLayout.tsx",
+    "frontend/src/features/country/CountriesMapSelector.tsx",
+    "frontend/src/features/country/countries.ts",
+    "frontend/src/features/country/worldMapPaths.ts",
+    "frontend/src/features/profile/ProfileSetupDialog.tsx",
+    "frontend/src/features/profile/useSaveCallerUserProfile.ts",
+    "frontend/src/features/settings/SettingsView.tsx",
     "project_state.json"
   ]
 }

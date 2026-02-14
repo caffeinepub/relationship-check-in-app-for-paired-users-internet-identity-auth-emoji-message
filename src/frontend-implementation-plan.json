@@ -1,21 +1,62 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Remove footer attribution line from shared layout",
+  "title": "Country map selection and profile persistence (frontend)",
   "requirements": [
     {
-      "id": "REQ-31",
-      "summary": "Remove the HeartSync/caffeine.ai attribution line (including heart icon and link) from the shared footer while keeping the “Created by Angelica Arboleda” line.",
+      "id": "REQ-35",
+      "summary": "Add an interactive Countries Map selector with searchable fallback to profile setup, and save selected country via existing profile save flow with React Query refresh.",
       "acceptanceCriteria": [
-        "Across all app screens that use the shared layout, the footer no longer displays any text similar to “© 2026 HeartSync. Built with … using caffeine.ai”.",
-        "The footer no longer renders the caffeine.ai outbound link.",
-        "The footer still renders the text “Created by Angelica Arboleda” in the footer."
+        "The profile setup experience includes a country selection step/control with a visible map-based interaction.",
+        "If the user cannot or does not want to use the map, they can still select a country via a searchable dropdown/list.",
+        "Submitting the profile saves both `name` and `country` and refreshes `currentUserProfile` via React Query invalidation."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/components/layout/AppLayout.tsx",
+          "path": "frontend/src/features/country/countries.ts",
+          "operation": "create",
+          "description": "Add a maintained, static list of countries (name + stable identifier such as ISO code) to power both the map selector and searchable fallback. Keep data local (no external services)."
+        },
+        {
+          "path": "frontend/src/features/country/CountriesMapSelector.tsx",
+          "operation": "create",
+          "description": "Create a reusable country selection component that provides (1) a visible interactive map-based picker and (2) a searchable dropdown/list fallback. Use existing shadcn/ui components (e.g., Card/Popover/Command/Input/Button) for the searchable UI and selection states; compose components only (do not edit immutable ui components). Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/features/country/worldMapPaths.ts",
+          "operation": "create",
+          "description": "Add a lightweight, static SVG path dataset (or other low-fidelity, locally-stored vector representation) mapping stable country identifiers to drawable shapes for the interactive map. Keep fidelity intentionally low per non-goals and avoid adding third-party services."
+        },
+        {
+          "path": "frontend/src/features/profile/useSaveCallerUserProfile.ts",
+          "operation": "create",
+          "description": "Add a dedicated React Query mutation hook for saving the caller profile that (a) accepts user-editable fields (at minimum: name and country), (b) submits via the existing backend actor save flow, and (c) invalidates the ['currentUserProfile'] query on success to refresh currentUserProfile."
+        },
+        {
+          "path": "frontend/src/features/profile/ProfileSetupDialog.tsx",
           "operation": "modify",
-          "description": "Update the shared footer markup to remove the entire attribution paragraph that includes the dynamic © year, the Heart icon, and the outbound caffeine.ai link, while leaving the existing “Created by Angelica Arboleda” footer line intact."
+          "description": "Extend the profile setup modal to include country selection using the new CountriesMapSelector (interactive map + searchable fallback). Update submit logic to save both name and country via the shared save mutation hook, and ensure ['currentUserProfile'] invalidation still occurs after a successful save. Verify the component's usage instructions before implementing."
+        }
+      ]
+    },
+    {
+      "id": "REQ-36",
+      "summary": "Allow onboarded users to view and update their country in Settings using the same country selector, persisting via profile save and reflecting after reload.",
+      "acceptanceCriteria": [
+        "Settings includes a section to view and edit the current user’s country.",
+        "Updating the country persists and is reflected after refresh/reload (pulled from `getCallerUserProfile`).",
+        "User-facing text for this feature is in English."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/features/settings/SettingsView.tsx",
+          "operation": "modify",
+          "description": "Add a new Settings section (English UI text) to display the current user's saved country and allow editing. Reuse CountriesMapSelector for map interaction + searchable fallback, and persist changes via useSaveCallerUserProfile with React Query invalidation so updates reflect immediately and after reload. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/features/profile/useGetCallerUserProfile.ts",
+          "operation": "modify",
+          "description": "Ensure the current user profile query state cleanly supports displaying an unset country and provides the needed data for Settings to render the current country without errors (no behavior change to authorization/auth flow)."
         }
       ]
     }

@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 15,
+  "projectStateVersion": 17,
   "summary": "Relationship app for two connected users to do a daily emotional check-in (emoji selection + short message), with authentication, a Firebase/Firestore backend, premium tier for multiple check-ins per day, plus an Emotional Map page, a Settings option to remove/disconnect a partner, a shared relationship status chosen by the invited partner during pairing and displayed on Home, and a shared daily streak feature that increments only when both partners check in on the same day and is displayed on Home.",
   "architectural_notes": [
     "Use Firebase as the backend (authentication + data storage) for users, couple connections, and daily check-ins.",
@@ -172,6 +172,22 @@
         "REQ-31"
       ],
       "version": 1
+    },
+    {
+      "id": "feature-add-a-frontend-countries-map-selection-ui-that-allows-a-user-to-choose-their-country-from-an-interactive-map-with-a-usability-fallback-such-as-a-searchable-dropdown-list-and-store-the-selected-value-in-the-user-profile-via-the-existing-profile-save-flow",
+      "title": "Add a frontend “Countries Map” selection UI that allows a user to choose their country from an interactive map (with a usability fallback such as a searchable dropdown/list), and store the selected value in the user profile via the existing profile save flow.",
+      "reqIds": [
+        "REQ-35"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-allow-an-already-onboarded-user-to-change-their-saved-country-later-from-within-the-app-e-g-in-settings-using-the-same-country-map-selector-and-persisting-the-change-to-their-profile",
+      "title": "Allow an already-onboarded user to change their saved country later from within the app (e.g., in Settings), using the same country map selector and persisting the change to their profile.",
+      "reqIds": [
+        "REQ-36"
+      ],
+      "version": 1
     }
   ],
   "new_feature_requests": [
@@ -335,6 +351,36 @@
       "id": "AR-32",
       "summary": "Remove the footer/credit line text: \"© 2026 HeartSync. Built with using caffeine.ai\" from the app UI",
       "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-33",
+      "summary": "Add a countries map UI and allow each user to select/save their country in their profile",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-34",
+      "summary": "Extend the backend `UserProfile` data model to include a persisted country field for each user (e.g., `country : ?Text` storing an ISO country code or a stable country identifier), and expose it through existing profile query methods.",
+      "reqIds": [
+        "REQ-32"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-35",
+      "summary": "Update `saveCallerUserProfile(profile : UserProfile)` so that saving profile details cannot unintentionally overwrite server-managed or pairing-related fields; it must preserve existing values for `premium`, `partner_ref`, `relationship_status`, `can_set_relationship_status`, `streak_count`, and `last_checkin_date`, while allowing the caller to update only user-editable fields (at minimum: `name` and the new `country` field).",
+      "reqIds": [
+        "REQ-33"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-36",
+      "summary": "Add a conditional backend migration (only if required by existing persisted state) to initialize the new profile country field for all existing users to `null`/unset (or another safe default) without modifying any other existing fields.",
+      "reqIds": [
+        "REQ-34"
+      ],
       "status": "pending"
     }
   ],

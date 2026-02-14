@@ -1,34 +1,86 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-14T21:37:33.369Z",
+  "generatedAt": "2026-02-14T21:46:05.313Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 1,
-    "implemented": 1,
+    "total": 5,
+    "implemented": 2,
     "items": [
       {
-        "id": "REQ-31",
-        "summary": "Remove the footer attribution line that reads “© {year} HeartSync. Built with [heart icon] using caffeine.ai” (including the heart icon and the caffeine.ai link) from the app UI footer, while keeping the existing “Created by Angelica Arboleda” footer line.",
+        "id": "REQ-32",
+        "summary": "Extend the backend `UserProfile` data model to include a persisted country field for each user (e.g., `country : ?Text` storing an ISO country code or a stable country identifier), and expose it through existing profile query methods.",
+        "status": "unknown",
+        "plannedFiles": [],
+        "matchedFiles": []
+      },
+      {
+        "id": "REQ-33",
+        "summary": "Update `saveCallerUserProfile(profile : UserProfile)` so that saving profile details cannot unintentionally overwrite server-managed or pairing-related fields; it must preserve existing values for `premium`, `partner_ref`, `relationship_status`, `can_set_relationship_status`, `streak_count`, and `last_checkin_date`, while allowing the caller to update only user-editable fields (at minimum: `name` and the new `country` field).",
+        "status": "unknown",
+        "plannedFiles": [],
+        "matchedFiles": []
+      },
+      {
+        "id": "REQ-34",
+        "summary": "Add a conditional backend migration (only if required by existing persisted state) to initialize the new profile country field for all existing users to `null`/unset (or another safe default) without modifying any other existing fields.",
+        "status": "unknown",
+        "plannedFiles": [],
+        "matchedFiles": []
+      },
+      {
+        "id": "REQ-35",
+        "summary": "Add a frontend “Countries Map” selection UI that allows a user to choose their country from an interactive map (with a usability fallback such as a searchable dropdown/list), and store the selected value in the user profile via the existing profile save flow.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/components/layout/AppLayout.tsx"
+          "frontend/src/features/country/countries.ts",
+          "frontend/src/features/country/CountriesMapSelector.tsx",
+          "frontend/src/features/country/worldMapPaths.ts",
+          "frontend/src/features/profile/useSaveCallerUserProfile.ts",
+          "frontend/src/features/profile/ProfileSetupDialog.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/components/layout/AppLayout.tsx"
+          "frontend/src/features/country/countries.ts",
+          "frontend/src/features/country/CountriesMapSelector.tsx",
+          "frontend/src/features/country/worldMapPaths.ts",
+          "frontend/src/features/profile/useSaveCallerUserProfile.ts",
+          "frontend/src/features/profile/ProfileSetupDialog.tsx"
+        ]
+      },
+      {
+        "id": "REQ-36",
+        "summary": "Allow an already-onboarded user to change their saved country later from within the app (e.g., in Settings), using the same country map selector and persisting the change to their profile.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/features/settings/SettingsView.tsx",
+          "frontend/src/features/profile/useGetCallerUserProfile.ts"
+        ],
+        "matchedFiles": [
+          "frontend/src/features/settings/SettingsView.tsx"
         ]
       }
     ]
   },
   "changedFiles": [
+    "backend/main.mo",
+    "backend/migration.mo",
     "build-request.json",
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/src/components/layout/AppLayout.tsx",
+    "frontend/src/backend.d.ts",
+    "frontend/src/backend.ts",
+    "frontend/src/declarations/backend.did.d.ts",
+    "frontend/src/declarations/backend.did.js",
+    "frontend/src/features/country/CountriesMapSelector.tsx",
+    "frontend/src/features/country/countries.ts",
+    "frontend/src/features/country/worldMapPaths.ts",
+    "frontend/src/features/profile/ProfileSetupDialog.tsx",
+    "frontend/src/features/profile/useSaveCallerUserProfile.ts",
+    "frontend/src/features/settings/SettingsView.tsx",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

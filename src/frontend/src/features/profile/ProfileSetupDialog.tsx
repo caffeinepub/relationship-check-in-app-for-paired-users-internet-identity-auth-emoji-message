@@ -1,6 +1,4 @@
 import { useState } from 'react';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useActor } from '../../hooks/useActor';
 import {
   Dialog,
   DialogContent,
@@ -13,7 +11,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Loader2 } from 'lucide-react';
-import type { UserProfile } from '../../backend';
+import { CountriesMapSelector } from '../country/CountriesMapSelector';
+import { useSaveCallerUserProfile } from './useSaveCallerUserProfile';
 
 interface ProfileSetupDialogProps {
   open: boolean;
@@ -21,44 +20,30 @@ interface ProfileSetupDialogProps {
 
 export function ProfileSetupDialog({ open }: ProfileSetupDialogProps) {
   const [name, setName] = useState('');
-  const { actor } = useActor();
-  const queryClient = useQueryClient();
-
-  const saveMutation = useMutation({
-    mutationFn: async (profileName: string) => {
-      if (!actor) throw new Error('Actor not available');
-      const profile: UserProfile = {
-        name: profileName,
-        premium: false,
-        can_set_relationship_status: false,
-        streak_count: BigInt(0),
-        last_checkin_date: undefined,
-      };
-      await actor.saveCallerUserProfile(profile);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['currentUserProfile'] });
-    },
-  });
+  const [country, setCountry] = useState<string>('');
+  const saveMutation = useSaveCallerUserProfile();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (name.trim()) {
-      saveMutation.mutate(name.trim());
+    if (name.trim() && country) {
+      saveMutation.mutate({ name: name.trim(), country });
     }
   };
 
   return (
     <Dialog open={open}>
-      <DialogContent className="sm:max-w-md" onInteractOutside={(e) => e.preventDefault()}>
+      <DialogContent 
+        className="sm:max-w-2xl max-h-[90vh] overflow-y-auto" 
+        onInteractOutside={(e) => e.preventDefault()}
+      >
         <form onSubmit={handleSubmit}>
           <DialogHeader>
             <DialogTitle>Welcome to HeartSync</DialogTitle>
             <DialogDescription>
-              Let's get started by setting up your profile. What should your partner call you?
+              Let's get started by setting up your profile.
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-4 py-4">
+          <div className="space-y-6 py-4">
             <div className="space-y-2">
               <Label htmlFor="name">Your Name</Label>
               <Input
@@ -70,6 +55,13 @@ export function ProfileSetupDialog({ open }: ProfileSetupDialogProps) {
                 autoFocus
               />
             </div>
+
+            <CountriesMapSelector
+              value={country}
+              onChange={setCountry}
+              disabled={saveMutation.isPending}
+            />
+
             {saveMutation.isError && (
               <p className="text-sm text-destructive">
                 Failed to save profile. Please try again.
@@ -79,7 +71,7 @@ export function ProfileSetupDialog({ open }: ProfileSetupDialogProps) {
           <DialogFooter>
             <Button
               type="submit"
-              disabled={!name.trim() || saveMutation.isPending}
+              disabled={!name.trim() || !country || saveMutation.isPending}
               className="w-full"
             >
               {saveMutation.isPending ? (

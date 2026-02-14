@@ -2,10 +2,14 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-remove-the-footer-attribution-line-that-reads-year-heartsync-built-with-heart-icon-using-caffeine-ai-including-the-heart-icon-and-the-caffeine-ai-link-from-the-app-ui-footer-while-keeping-the-existing-created-by-angelica-arboleda-footer-line",
-      "featureTitle": "Remove the footer attribution line that reads “© {year} HeartSync. Built with [heart icon] using caffeine.ai” (including the heart icon and the caffeine.ai link) from the app UI footer, while keeping the existing “Created by Angelica Arboleda” footer line.",
+      "featureId": "feature-add-a-frontend-countries-map-selection-ui-that-allows-a-user-to-choose-their-country-from-an-interactive-map-with-a-usability-fallback-such-as-a-searchable-dropdown-list-and-store-the-selected-value-in-the-user-profile-via-the-existing-profile-save-flow",
+      "featureTitle": "Add a frontend “Countries Map” selection UI that allows a user to choose their country from an interactive map (with a usability fallback such as a searchable dropdown/list), and store the selected value in the user profile via the existing profile save flow.",
       "files": [
-        "frontend/src/components/layout/AppLayout.tsx"
+        "frontend/src/features/country/CountriesMapSelector.tsx",
+        "frontend/src/features/country/countries.ts",
+        "frontend/src/features/country/worldMapPaths.ts",
+        "frontend/src/features/profile/ProfileSetupDialog.tsx",
+        "frontend/src/features/profile/useSaveCallerUserProfile.ts"
       ],
       "components": [
         "authorization@4.0.0",
@@ -17,7 +21,27 @@
         "invite-links@3.0.0"
       ],
       "testIds": [
-        "REQ-31"
+        "REQ-35"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-allow-an-already-onboarded-user-to-change-their-saved-country-later-from-within-the-app-e-g-in-settings-using-the-same-country-map-selector-and-persisting-the-change-to-their-profile",
+      "featureTitle": "Allow an already-onboarded user to change their saved country later from within the app (e.g., in Settings), using the same country map selector and persisting the change to their profile.",
+      "files": [
+        "frontend/src/features/settings/SettingsView.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0",
+        "invite-links@3.0.0"
+      ],
+      "testIds": [
+        "REQ-36"
       ],
       "confidence": "high"
     }

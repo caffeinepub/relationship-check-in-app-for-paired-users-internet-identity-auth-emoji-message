@@ -1,49 +1,53 @@
 import Map "mo:core/Map";
 import Principal "mo:core/Principal";
-import List "mo:core/List";
-import Time "mo:core/Time";
 
 module {
   type OldUserProfile = {
     name : Text;
+    premium : Bool;
+    partner_ref : ?Principal.Principal;
+    relationship_status : ?RelationshipStatus;
+    can_set_relationship_status : Bool;
+    streak_count : Nat;
+    last_checkin_date : ?Nat;
   };
 
   type OldActor = {
-    userProfiles : Map.Map<Principal, OldUserProfile>;
-    couples : Map.Map<Principal, Principal>;
-    checkIns : Map.Map<Principal, List.List<CheckIn>>;
-    tokens : Map.Map<Text, Principal>;
+    userProfiles : Map.Map<Principal.Principal, OldUserProfile>;
   };
 
   type NewUserProfile = {
     name : Text;
     premium : Bool;
-  };
-
-  public type CheckIn = {
-    timestamp : Time.Time;
-    emoji : Text;
-    message : Text;
-    author : Principal;
+    partner_ref : ?Principal.Principal;
+    relationship_status : ?RelationshipStatus;
+    can_set_relationship_status : Bool;
+    streak_count : Nat;
+    last_checkin_date : ?Nat;
+    country : ?Text;
   };
 
   type NewActor = {
-    userProfiles : Map.Map<Principal, NewUserProfile>;
-    couples : Map.Map<Principal, Principal>;
-    checkIns : Map.Map<Principal, List.List<CheckIn>>;
-    tokens : Map.Map<Text, Principal>;
+    userProfiles : Map.Map<Principal.Principal, NewUserProfile>;
   };
 
   public func run(old : OldActor) : NewActor {
-    let newProfiles = old.userProfiles.map<Principal, OldUserProfile, NewUserProfile>(
+    let newUserProfiles = old.userProfiles.map<Principal.Principal, OldUserProfile, NewUserProfile>(
       func(_principal, oldProfile) {
-        { oldProfile with premium = false };
+        {
+          oldProfile with
+          country = null;
+        };
       }
     );
-
     {
       old with
-      userProfiles = newProfiles
+      userProfiles = newUserProfiles;
     };
+  };
+
+  public type RelationshipStatus = {
+    status : Text;
+    customMessage : Text;
   };
 };

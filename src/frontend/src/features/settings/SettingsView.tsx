@@ -12,7 +12,11 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { useDisconnectPartner } from '../pairing/useDisconnectPartner';
-import { Loader2, UserX } from 'lucide-react';
+import { useGetCallerUserProfile } from '../profile/useGetCallerUserProfile';
+import { useSaveCallerUserProfile } from '../profile/useSaveCallerUserProfile';
+import { CountriesMapSelector } from '../country/CountriesMapSelector';
+import { getCountryByCode } from '../country/countries';
+import { Loader2, UserX, Save } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface SettingsViewProps {
@@ -21,7 +25,15 @@ interface SettingsViewProps {
 
 export function SettingsView({ onDisconnectSuccess }: SettingsViewProps) {
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [editingCountry, setEditingCountry] = useState(false);
+  const [selectedCountry, setSelectedCountry] = useState<string>('');
+  
   const disconnectMutation = useDisconnectPartner();
+  const { data: userProfile } = useGetCallerUserProfile();
+  const saveProfileMutation = useSaveCallerUserProfile();
+
+  const currentCountry = userProfile?.country;
+  const currentCountryName = currentCountry ? getCountryByCode(currentCountry)?.name : 'Not set';
 
   const handleConfirmDisconnect = async () => {
     try {
@@ -30,7 +42,6 @@ export function SettingsView({ onDisconnectSuccess }: SettingsViewProps) {
       toast.success('Partner removed successfully.');
       onDisconnectSuccess();
     } catch (error: any) {
-      // Handle already disconnected case gracefully
       if (error.message?.includes('not currently paired')) {
         setShowConfirmDialog(false);
         toast.success('Partner removed successfully.');
@@ -41,12 +52,93 @@ export function SettingsView({ onDisconnectSuccess }: SettingsViewProps) {
     }
   };
 
+  const handleEditCountry = () => {
+    setSelectedCountry(currentCountry || '');
+    setEditingCountry(true);
+  };
+
+  const handleSaveCountry = async () => {
+    if (!userProfile || !selectedCountry) return;
+    
+    try {
+      await saveProfileMutation.mutateAsync({
+        name: userProfile.name,
+        country: selectedCountry,
+      });
+      toast.success('Country updated successfully.');
+      setEditingCountry(false);
+    } catch (error) {
+      toast.error('Failed to update country. Please try again.');
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setEditingCountry(false);
+    setSelectedCountry('');
+  };
+
   return (
     <div className="max-w-2xl mx-auto space-y-6">
       <div className="text-center space-y-2">
         <h1 className="text-3xl font-bold tracking-tight">Settings</h1>
         <p className="text-muted-foreground">Manage your connection and preferences</p>
       </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Country</CardTitle>
+          <CardDescription>Your current location</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {!editingCountry ? (
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="font-medium">{currentCountryName}</p>
+                <p className="text-sm text-muted-foreground">
+                  {currentCountry ? `Code: ${currentCountry}` : 'No country selected'}
+                </p>
+              </div>
+              <Button onClick={handleEditCountry} variant="outline">
+                Edit
+              </Button>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              <CountriesMapSelector
+                value={selectedCountry}
+                onChange={setSelectedCountry}
+                disabled={saveProfileMutation.isPending}
+              />
+              <div className="flex gap-2">
+                <Button
+                  onClick={handleSaveCountry}
+                  disabled={!selectedCountry || saveProfileMutation.isPending}
+                  className="flex-1 gap-2"
+                >
+                  {saveProfileMutation.isPending ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Saving...
+                    </>
+                  ) : (
+                    <>
+                      <Save className="h-4 w-4" />
+                      Save Country
+                    </>
+                  )}
+                </Button>
+                <Button
+                  onClick={handleCancelEdit}
+                  variant="outline"
+                  disabled={saveProfileMutation.isPending}
+                >
+                  Cancel
+                </Button>
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader>

@@ -8,14 +8,13 @@ import Order "mo:core/Order";
 import Nat "mo:core/Nat";
 import Runtime "mo:core/Runtime";
 import Principal "mo:core/Principal";
-
-
 import MixinAuthorization "authorization/MixinAuthorization";
 import AccessControl "authorization/access-control";
 import InviteLinksModule "invite-links/invite-links-module";
 import Random "mo:core/Random";
+import Migration "migration";
 
-
+(with migration = Migration.run)
 actor {
   let accessControlState = AccessControl.initState();
   include MixinAuthorization(accessControlState);
@@ -30,6 +29,7 @@ actor {
     can_set_relationship_status : Bool;
     streak_count : Nat;
     last_checkin_date : ?Nat;
+    country : ?Text;
   };
 
   public type CheckIn = {
@@ -118,13 +118,34 @@ actor {
       Runtime.trap("Unauthorized: Only users can save profiles");
     };
 
-    let premiumStatus = switch (userProfiles.get(caller)) {
-      case (null) { false };
-      case (?existingProfile) { existingProfile.premium };
+    let oldProfile = switch (userProfiles.get(caller)) {
+      case (null) {
+        {
+          name = profile.name;
+          premium = false;
+          partner_ref = null;
+          relationship_status = null;
+          can_set_relationship_status = false;
+          streak_count = 0;
+          last_checkin_date = null;
+          country = profile.country;
+        };
+      };
+      case (?existingProfile) {
+        {
+          name = profile.name;
+          premium = existingProfile.premium;
+          partner_ref = existingProfile.partner_ref;
+          relationship_status = existingProfile.relationship_status;
+          can_set_relationship_status = existingProfile.can_set_relationship_status;
+          streak_count = existingProfile.streak_count;
+          last_checkin_date = existingProfile.last_checkin_date;
+          country = profile.country;
+        };
+      };
     };
 
-    let profileWithPreservedPremium = { profile with premium = premiumStatus };
-    userProfiles.add(caller, profileWithPreservedPremium);
+    userProfiles.add(caller, oldProfile);
   };
 
   public shared ({ caller }) func setPremiumStatus(user : Principal, premium : Bool) : async () {
@@ -157,6 +178,7 @@ actor {
           can_set_relationship_status = false;
           streak_count = 0;
           last_checkin_date = null;
+          country = null;
         };
         userProfiles.add(caller, newProfile);
         let token = caller.toText();
@@ -194,6 +216,7 @@ actor {
           can_set_relationship_status = false;
           streak_count = 0;
           last_checkin_date = null;
+          country = null;
         };
         userProfiles.add(caller, newProfile);
       };
@@ -216,6 +239,7 @@ actor {
               can_set_relationship_status = false;
               streak_count = 0;
               last_checkin_date = null;
+              country = null;
             };
             userProfiles.add(inviter, newProfile);
             newProfile;
@@ -236,6 +260,7 @@ actor {
           can_set_relationship_status = true;
           streak_count = 0;
           last_checkin_date = null;
+          country = null;
         };
 
         userProfiles.add(inviter, inviterProfile);
