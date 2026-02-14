@@ -13,6 +13,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Loader2 } from 'lucide-react';
+import type { UserProfile } from '../../backend';
 
 interface ProfileSetupDialogProps {
   open: boolean;
@@ -26,7 +27,14 @@ export function ProfileSetupDialog({ open }: ProfileSetupDialogProps) {
   const saveMutation = useMutation({
     mutationFn: async (profileName: string) => {
       if (!actor) throw new Error('Actor not available');
-      await actor.saveCallerUserProfile({ name: profileName, premium: false });
+      const profile: UserProfile = {
+        name: profileName,
+        premium: false,
+        can_set_relationship_status: false,
+        streak_count: BigInt(0),
+        last_checkin_date: undefined,
+      };
+      await actor.saveCallerUserProfile(profile);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['currentUserProfile'] });

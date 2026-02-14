@@ -1,32 +1,23 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useActor } from '../../hooks/useActor';
 
-export function useJoinWithToken() {
+export function useDisconnectPartner() {
   const { actor } = useActor();
   const queryClient = useQueryClient();
 
-  const mutation = useMutation({
-    mutationFn: async (token: string) => {
-      if (!actor) throw new Error('Not authenticated');
-      return actor.joinWithToken(token);
+  return useMutation({
+    mutationFn: async () => {
+      if (!actor) throw new Error('Actor not available');
+      await actor.disconnect();
     },
     onSuccess: () => {
+      // Invalidate all pairing-dependent queries
       queryClient.invalidateQueries({ queryKey: ['partner'] });
       queryClient.invalidateQueries({ queryKey: ['partnerProfile'] });
+      queryClient.invalidateQueries({ queryKey: ['todayCheckIns'] });
+      queryClient.invalidateQueries({ queryKey: ['checkInHistory'] });
       queryClient.invalidateQueries({ queryKey: ['relationshipStatus'] });
       queryClient.invalidateQueries({ queryKey: ['currentUserProfile'] });
     },
   });
-
-  const errorMessage = mutation.error
-    ? mutation.error instanceof Error
-      ? mutation.error.message
-      : 'Failed to join with token'
-    : undefined;
-
-  return {
-    joinWithToken: mutation.mutate,
-    isJoining: mutation.isPending,
-    error: errorMessage,
-  };
 }

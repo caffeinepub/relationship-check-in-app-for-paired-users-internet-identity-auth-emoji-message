@@ -1,17 +1,27 @@
+import { useState } from 'react';
 import { useInternetIdentity } from './hooks/useInternetIdentity';
 import { useGetCallerUserProfile } from './features/profile/useGetCallerUserProfile';
 import { ProfileSetupDialog } from './features/profile/ProfileSetupDialog';
 import { LoginButton } from './components/auth/LoginButton';
 import { AppLayout } from './components/layout/AppLayout';
 import { DashboardView } from './features/dashboard/DashboardView';
+import { EmotionalMapView } from './features/emotionalmap/EmotionalMapView';
+import { SettingsView } from './features/settings/SettingsView';
 import { PairingCard } from './features/pairing/PairingCard';
 import { usePairingStatus } from './features/pairing/usePairingStatus';
-import { Loader2 } from 'lucide-react';
+import { useRelationshipStatusState } from './features/relationshipStatus/useRelationshipStatusState';
+import { ChooseRelationshipStatusView } from './features/relationshipStatus/ChooseRelationshipStatusView';
+import { Loader2, Heart, Map, Settings } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+
+type PairedView = 'dashboard' | 'emotionalmap' | 'settings';
 
 export default function App() {
   const { identity, isInitializing } = useInternetIdentity();
   const { data: userProfile, isLoading: profileLoading, isFetched } = useGetCallerUserProfile();
   const { isPaired, isLoading: pairingLoading } = usePairingStatus();
+  const { isChooser, hasStatus, isLoading: statusLoading, isFetched: statusFetched } = useRelationshipStatusState();
+  const [currentView, setCurrentView] = useState<PairedView>('dashboard');
 
   const isAuthenticated = !!identity;
 
@@ -81,10 +91,69 @@ export default function App() {
     );
   }
 
-  // Paired - show dashboard
+  // Show loading while checking relationship status
+  if (statusLoading) {
+    return (
+      <AppLayout>
+        <div className="flex min-h-[60vh] items-center justify-center">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      </AppLayout>
+    );
+  }
+
+  // Paired but status not chosen yet - show chooser view if user is the designated chooser
+  if (isPaired && statusFetched && isChooser && !hasStatus) {
+    return (
+      <AppLayout>
+        <ChooseRelationshipStatusView onComplete={() => setCurrentView('dashboard')} />
+      </AppLayout>
+    );
+  }
+
+  // Paired - show navigation and selected view
+  const handleDisconnectSuccess = () => {
+    setCurrentView('dashboard');
+  };
+
   return (
     <AppLayout>
-      <DashboardView />
+      <div className="space-y-6">
+        {/* Navigation */}
+        <div className="flex justify-center gap-2">
+          <Button
+            variant={currentView === 'dashboard' ? 'default' : 'outline'}
+            onClick={() => setCurrentView('dashboard')}
+            className="gap-2"
+          >
+            <Heart className="h-4 w-4" />
+            Dashboard
+          </Button>
+          <Button
+            variant={currentView === 'emotionalmap' ? 'default' : 'outline'}
+            onClick={() => setCurrentView('emotionalmap')}
+            className="gap-2"
+          >
+            <Map className="h-4 w-4" />
+            Emotional Map
+          </Button>
+          <Button
+            variant={currentView === 'settings' ? 'default' : 'outline'}
+            onClick={() => setCurrentView('settings')}
+            className="gap-2"
+          >
+            <Settings className="h-4 w-4" />
+            Settings
+          </Button>
+        </div>
+
+        {/* View Content */}
+        {currentView === 'dashboard' && <DashboardView />}
+        {currentView === 'emotionalmap' && <EmotionalMapView />}
+        {currentView === 'settings' && (
+          <SettingsView onDisconnectSuccess={handleDisconnectSuccess} />
+        )}
+      </div>
     </AppLayout>
   );
 }

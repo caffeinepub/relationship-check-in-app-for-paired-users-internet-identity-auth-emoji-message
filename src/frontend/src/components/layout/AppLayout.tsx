@@ -3,6 +3,7 @@ import { useInternetIdentity } from '../../hooks/useInternetIdentity';
 import { usePairingStatus } from '../../features/pairing/usePairingStatus';
 import { Heart } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { Toaster } from '@/components/ui/sonner';
 
 interface AppLayoutProps {
   children: React.ReactNode;
@@ -44,23 +45,12 @@ export function AppLayout({ children, showAuthButton = true }: AppLayoutProps) {
       <footer className="border-t border-border/40 bg-card/30 mt-16">
         <div className="container mx-auto px-4 py-6">
           <div className="text-center text-sm text-muted-foreground">
-            <p>
-              © {new Date().getFullYear()} HeartSync. Built with{' '}
-              <Heart className="inline h-3 w-3 text-primary fill-primary" /> using{' '}
-              <a
-                href={`https://caffeine.ai/?utm_source=Caffeine-footer&utm_medium=referral&utm_content=${encodeURIComponent(
-                  typeof window !== 'undefined' ? window.location.hostname : 'heartsync-app'
-                )}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="font-medium text-foreground hover:text-primary transition-colors"
-              >
-                caffeine.ai
-              </a>
-            </p>
+            <p>Created by Angelica Arboleda</p>
           </div>
         </div>
       </footer>
+
+      <Toaster />
     </div>
   );
 }

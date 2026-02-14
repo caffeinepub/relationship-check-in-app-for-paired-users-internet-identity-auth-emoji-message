@@ -13,6 +13,7 @@ export function useSubmitCheckIn() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['todayCheckIns'] });
       queryClient.invalidateQueries({ queryKey: ['checkInHistory'] });
+      queryClient.invalidateQueries({ queryKey: ['streak'] });
     },
   });
 

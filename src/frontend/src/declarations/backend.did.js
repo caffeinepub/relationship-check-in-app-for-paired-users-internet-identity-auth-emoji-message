@@ -14,26 +14,56 @@ export const UserRole = IDL.Variant({
   'guest' : IDL.Null,
 });
 export const Token = IDL.Text;
-export const UserProfile = IDL.Record({
-  'premium' : IDL.Bool,
-  'name' : IDL.Text,
-});
 export const Time = IDL.Int;
+export const RSVP = IDL.Record({
+  'name' : IDL.Text,
+  'inviteCode' : IDL.Text,
+  'timestamp' : Time,
+  'attending' : IDL.Bool,
+});
+export const RelationshipStatus = IDL.Record({
+  'status' : IDL.Text,
+  'customMessage' : IDL.Text,
+});
+export const UserProfile = IDL.Record({
+  'relationship_status' : IDL.Opt(RelationshipStatus),
+  'streak_count' : IDL.Nat,
+  'can_set_relationship_status' : IDL.Bool,
+  'premium' : IDL.Bool,
+  'partner_ref' : IDL.Opt(IDL.Principal),
+  'name' : IDL.Text,
+  'last_checkin_date' : IDL.Opt(IDL.Nat),
+});
 export const CheckIn = IDL.Record({
   'emoji' : IDL.Text,
   'author' : IDL.Principal,
   'message' : IDL.Text,
   'timestamp' : Time,
 });
+export const InviteCode = IDL.Record({
+  'created' : Time,
+  'code' : IDL.Text,
+  'used' : IDL.Bool,
+});
 
 export const idlService = IDL.Service({
   '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
   'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
+  'disconnect' : IDL.Func([], [], []),
+  'generateInviteCode' : IDL.Func([], [IDL.Text], []),
   'generateInviteToken' : IDL.Func([], [Token], []),
+  'getAllRSVPs' : IDL.Func([], [IDL.Vec(RSVP)], ['query']),
   'getCallerUserProfile' : IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
   'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
   'getCheckInHistory' : IDL.Func([IDL.Nat], [IDL.Vec(CheckIn)], ['query']),
+  'getInviteCodes' : IDL.Func([], [IDL.Vec(InviteCode)], ['query']),
   'getPartner' : IDL.Func([], [IDL.Opt(IDL.Principal)], ['query']),
+  'getRelationshipStatus' : IDL.Func(
+      [],
+      [IDL.Opt(RelationshipStatus)],
+      ['query'],
+    ),
+  'getSharedStreak' : IDL.Func([], [IDL.Nat], ['query']),
   'getTodayCheckIns' : IDL.Func([], [IDL.Vec(CheckIn)], ['query']),
   'getUserProfile' : IDL.Func(
       [IDL.Principal],
@@ -45,7 +75,9 @@ export const idlService = IDL.Service({
   'joinWithToken' : IDL.Func([Token], [IDL.Principal], []),
   'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
   'setPremiumStatus' : IDL.Func([IDL.Principal, IDL.Bool], [], []),
+  'setRelationshipStatus' : IDL.Func([RelationshipStatus], [], []),
   'submitCheckIn' : IDL.Func([IDL.Text, IDL.Text], [], []),
+  'submitRSVP' : IDL.Func([IDL.Text, IDL.Bool, IDL.Text], [], []),
 });
 
 export const idlInitArgs = [];
@@ -57,23 +89,56 @@ export const idlFactory = ({ IDL }) => {
     'guest' : IDL.Null,
   });
   const Token = IDL.Text;
-  const UserProfile = IDL.Record({ 'premium' : IDL.Bool, 'name' : IDL.Text });
   const Time = IDL.Int;
+  const RSVP = IDL.Record({
+    'name' : IDL.Text,
+    'inviteCode' : IDL.Text,
+    'timestamp' : Time,
+    'attending' : IDL.Bool,
+  });
+  const RelationshipStatus = IDL.Record({
+    'status' : IDL.Text,
+    'customMessage' : IDL.Text,
+  });
+  const UserProfile = IDL.Record({
+    'relationship_status' : IDL.Opt(RelationshipStatus),
+    'streak_count' : IDL.Nat,
+    'can_set_relationship_status' : IDL.Bool,
+    'premium' : IDL.Bool,
+    'partner_ref' : IDL.Opt(IDL.Principal),
+    'name' : IDL.Text,
+    'last_checkin_date' : IDL.Opt(IDL.Nat),
+  });
   const CheckIn = IDL.Record({
     'emoji' : IDL.Text,
     'author' : IDL.Principal,
     'message' : IDL.Text,
     'timestamp' : Time,
   });
+  const InviteCode = IDL.Record({
+    'created' : Time,
+    'code' : IDL.Text,
+    'used' : IDL.Bool,
+  });
   
   return IDL.Service({
     '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
     'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
+    'disconnect' : IDL.Func([], [], []),
+    'generateInviteCode' : IDL.Func([], [IDL.Text], []),
     'generateInviteToken' : IDL.Func([], [Token], []),
+    'getAllRSVPs' : IDL.Func([], [IDL.Vec(RSVP)], ['query']),
     'getCallerUserProfile' : IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
     'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
     'getCheckInHistory' : IDL.Func([IDL.Nat], [IDL.Vec(CheckIn)], ['query']),
+    'getInviteCodes' : IDL.Func([], [IDL.Vec(InviteCode)], ['query']),
     'getPartner' : IDL.Func([], [IDL.Opt(IDL.Principal)], ['query']),
+    'getRelationshipStatus' : IDL.Func(
+        [],
+        [IDL.Opt(RelationshipStatus)],
+        ['query'],
+      ),
+    'getSharedStreak' : IDL.Func([], [IDL.Nat], ['query']),
     'getTodayCheckIns' : IDL.Func([], [IDL.Vec(CheckIn)], ['query']),
     'getUserProfile' : IDL.Func(
         [IDL.Principal],
@@ -85,7 +150,9 @@ export const idlFactory = ({ IDL }) => {
     'joinWithToken' : IDL.Func([Token], [IDL.Principal], []),
     'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
     'setPremiumStatus' : IDL.Func([IDL.Principal, IDL.Bool], [], []),
+    'setRelationshipStatus' : IDL.Func([RelationshipStatus], [], []),
     'submitCheckIn' : IDL.Func([IDL.Text, IDL.Text], [], []),
+    'submitRSVP' : IDL.Func([IDL.Text, IDL.Bool, IDL.Text], [], []),
   });
 };
 

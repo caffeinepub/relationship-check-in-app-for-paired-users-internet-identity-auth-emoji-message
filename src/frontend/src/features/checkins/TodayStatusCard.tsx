@@ -4,6 +4,7 @@ import { Separator } from '@/components/ui/separator';
 import { useTodayCheckIns } from './useTodayCheckIns';
 import { useInternetIdentity } from '../../hooks/useInternetIdentity';
 import { usePairingStatus } from '../pairing/usePairingStatus';
+import { getLatestCheckInByAuthor } from '../../lib/checkInHelpers';
 import { CheckCircle2, Clock, Loader2 } from 'lucide-react';
 
 export function TodayStatusCard() {
@@ -23,7 +24,7 @@ export function TodayStatusCard() {
 
   const currentPrincipal = identity?.getPrincipal().toString();
   
-  // Filter check-ins by author and get the latest one for each person
+  // Filter check-ins by author
   const myCheckIns = todayCheckIns?.filter(
     (checkIn) => checkIn.author.toString() === currentPrincipal
   ) || [];
@@ -31,16 +32,15 @@ export function TodayStatusCard() {
     (checkIn) => checkIn.author.toString() !== currentPrincipal
   ) || [];
 
-  // Get the latest check-in for each person (highest timestamp)
-  const myCheckIn = myCheckIns.length > 0
-    ? myCheckIns.reduce((latest, current) => 
-        current.timestamp > latest.timestamp ? current : latest
-      )
+  // Get the latest check-in for each person using shared helper
+  const myCheckIn = currentPrincipal
+    ? getLatestCheckInByAuthor(todayCheckIns || [], currentPrincipal)
     : null;
   
-  const partnerCheckIn = partnerCheckIns.length > 0
-    ? partnerCheckIns.reduce((latest, current) => 
-        current.timestamp > latest.timestamp ? current : latest
+  const partnerCheckIn = todayCheckIns && currentPrincipal
+    ? getLatestCheckInByAuthor(
+        todayCheckIns.filter(c => c.author.toString() !== currentPrincipal),
+        todayCheckIns.find(c => c.author.toString() !== currentPrincipal)?.author.toString() || ''
       )
     : null;
 

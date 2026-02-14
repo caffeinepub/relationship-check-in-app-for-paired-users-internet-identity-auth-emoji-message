@@ -16,20 +16,49 @@ export interface CheckIn {
   'message' : string,
   'timestamp' : Time,
 }
+export interface InviteCode {
+  'created' : Time,
+  'code' : string,
+  'used' : boolean,
+}
+export interface RSVP {
+  'name' : string,
+  'inviteCode' : string,
+  'timestamp' : Time,
+  'attending' : boolean,
+}
+export interface RelationshipStatus {
+  'status' : string,
+  'customMessage' : string,
+}
 export type Time = bigint;
 export type Token = string;
-export interface UserProfile { 'premium' : boolean, 'name' : string }
+export interface UserProfile {
+  'relationship_status' : [] | [RelationshipStatus],
+  'streak_count' : bigint,
+  'can_set_relationship_status' : boolean,
+  'premium' : boolean,
+  'partner_ref' : [] | [Principal],
+  'name' : string,
+  'last_checkin_date' : [] | [bigint],
+}
 export type UserRole = { 'admin' : null } |
   { 'user' : null } |
   { 'guest' : null };
 export interface _SERVICE {
   '_initializeAccessControlWithSecret' : ActorMethod<[string], undefined>,
   'assignCallerUserRole' : ActorMethod<[Principal, UserRole], undefined>,
+  'disconnect' : ActorMethod<[], undefined>,
+  'generateInviteCode' : ActorMethod<[], string>,
   'generateInviteToken' : ActorMethod<[], Token>,
+  'getAllRSVPs' : ActorMethod<[], Array<RSVP>>,
   'getCallerUserProfile' : ActorMethod<[], [] | [UserProfile]>,
   'getCallerUserRole' : ActorMethod<[], UserRole>,
   'getCheckInHistory' : ActorMethod<[bigint], Array<CheckIn>>,
+  'getInviteCodes' : ActorMethod<[], Array<InviteCode>>,
   'getPartner' : ActorMethod<[], [] | [Principal]>,
+  'getRelationshipStatus' : ActorMethod<[], [] | [RelationshipStatus]>,
+  'getSharedStreak' : ActorMethod<[], bigint>,
   'getTodayCheckIns' : ActorMethod<[], Array<CheckIn>>,
   'getUserProfile' : ActorMethod<[Principal], [] | [UserProfile]>,
   'hasPremium' : ActorMethod<[], boolean>,
@@ -37,7 +66,9 @@ export interface _SERVICE {
   'joinWithToken' : ActorMethod<[Token], Principal>,
   'saveCallerUserProfile' : ActorMethod<[UserProfile], undefined>,
   'setPremiumStatus' : ActorMethod<[Principal, boolean], undefined>,
+  'setRelationshipStatus' : ActorMethod<[RelationshipStatus], undefined>,
   'submitCheckIn' : ActorMethod<[string, string], undefined>,
+  'submitRSVP' : ActorMethod<[string, boolean, string], undefined>,
 }
 export declare const idlService: IDL.ServiceClass;
 export declare const idlInitArgs: IDL.Type[];

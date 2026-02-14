@@ -89,7 +89,12 @@ export class ExternalBlob {
         return this;
     }
 }
-export type Token = string;
+export interface RSVP {
+    name: string;
+    inviteCode: string;
+    timestamp: Time;
+    attending: boolean;
+}
 export interface CheckIn {
     emoji: string;
     author: Principal;
@@ -97,9 +102,24 @@ export interface CheckIn {
     timestamp: Time;
 }
 export type Time = bigint;
+export type Token = string;
+export interface RelationshipStatus {
+    status: string;
+    customMessage: string;
+}
+export interface InviteCode {
+    created: Time;
+    code: string;
+    used: boolean;
+}
 export interface UserProfile {
+    relationship_status?: RelationshipStatus;
+    streak_count: bigint;
+    can_set_relationship_status: boolean;
     premium: boolean;
+    partner_ref?: Principal;
     name: string;
+    last_checkin_date?: bigint;
 }
 export enum UserRole {
     admin = "admin",
@@ -109,11 +129,17 @@ export enum UserRole {
 export interface backendInterface {
     _initializeAccessControlWithSecret(userSecret: string): Promise<void>;
     assignCallerUserRole(user: Principal, role: UserRole): Promise<void>;
+    disconnect(): Promise<void>;
+    generateInviteCode(): Promise<string>;
     generateInviteToken(): Promise<Token>;
+    getAllRSVPs(): Promise<Array<RSVP>>;
     getCallerUserProfile(): Promise<UserProfile | null>;
     getCallerUserRole(): Promise<UserRole>;
     getCheckInHistory(limit: bigint): Promise<Array<CheckIn>>;
+    getInviteCodes(): Promise<Array<InviteCode>>;
     getPartner(): Promise<Principal | null>;
+    getRelationshipStatus(): Promise<RelationshipStatus | null>;
+    getSharedStreak(): Promise<bigint>;
     getTodayCheckIns(): Promise<Array<CheckIn>>;
     getUserProfile(user: Principal): Promise<UserProfile | null>;
     hasPremium(): Promise<boolean>;
@@ -121,9 +147,11 @@ export interface backendInterface {
     joinWithToken(token: Token): Promise<Principal>;
     saveCallerUserProfile(profile: UserProfile): Promise<void>;
     setPremiumStatus(user: Principal, premium: boolean): Promise<void>;
+    setRelationshipStatus(status: RelationshipStatus): Promise<void>;
     submitCheckIn(emoji: string, message: string): Promise<void>;
+    submitRSVP(name: string, attending: boolean, inviteCode: string): Promise<void>;
 }
-import type { UserProfile as _UserProfile, UserRole as _UserRole } from "./declarations/backend.did.d.ts";
+import type { RelationshipStatus as _RelationshipStatus, UserProfile as _UserProfile, UserRole as _UserRole } from "./declarations/backend.did.d.ts";
 export class Backend implements backendInterface {
     constructor(private actor: ActorSubclass<_SERVICE>, private _uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, private _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, private processError?: (error: unknown) => never){}
     async _initializeAccessControlWithSecret(arg0: string): Promise<void> {
@@ -154,6 +182,34 @@ export class Backend implements backendInterface {
             return result;
         }
     }
+    async disconnect(): Promise<void> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.disconnect();
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.disconnect();
+            return result;
+        }
+    }
+    async generateInviteCode(): Promise<string> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.generateInviteCode();
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.generateInviteCode();
+            return result;
+        }
+    }
     async generateInviteToken(): Promise<Token> {
         if (this.processError) {
             try {
@@ -165,6 +221,20 @@ export class Backend implements backendInterface {
             }
         } else {
             const result = await this.actor.generateInviteToken();
+            return result;
+        }
+    }
+    async getAllRSVPs(): Promise<Array<RSVP>> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.getAllRSVPs();
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.getAllRSVPs();
             return result;
         }
     }
@@ -186,14 +256,14 @@ export class Backend implements backendInterface {
         if (this.processError) {
             try {
                 const result = await this.actor.getCallerUserRole();
-                return from_candid_UserRole_n4(this._uploadFile, this._downloadFile, result);
+                return from_candid_UserRole_n9(this._uploadFile, this._downloadFile, result);
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
             const result = await this.actor.getCallerUserRole();
-            return from_candid_UserRole_n4(this._uploadFile, this._downloadFile, result);
+            return from_candid_UserRole_n9(this._uploadFile, this._downloadFile, result);
         }
     }
     async getCheckInHistory(arg0: bigint): Promise<Array<CheckIn>> {
@@ -210,18 +280,60 @@ export class Backend implements backendInterface {
             return result;
         }
     }
+    async getInviteCodes(): Promise<Array<InviteCode>> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.getInviteCodes();
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.getInviteCodes();
+            return result;
+        }
+    }
     async getPartner(): Promise<Principal | null> {
         if (this.processError) {
             try {
                 const result = await this.actor.getPartner();
-                return from_candid_opt_n6(this._uploadFile, this._downloadFile, result);
+                return from_candid_opt_n7(this._uploadFile, this._downloadFile, result);
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
             const result = await this.actor.getPartner();
+            return from_candid_opt_n7(this._uploadFile, this._downloadFile, result);
+        }
+    }
+    async getRelationshipStatus(): Promise<RelationshipStatus | null> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.getRelationshipStatus();
+                return from_candid_opt_n6(this._uploadFile, this._downloadFile, result);
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.getRelationshipStatus();
             return from_candid_opt_n6(this._uploadFile, this._downloadFile, result);
+        }
+    }
+    async getSharedStreak(): Promise<bigint> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.getSharedStreak();
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.getSharedStreak();
+            return result;
         }
     }
     async getTodayCheckIns(): Promise<Array<CheckIn>> {
@@ -297,14 +409,14 @@ export class Backend implements backendInterface {
     async saveCallerUserProfile(arg0: UserProfile): Promise<void> {
         if (this.processError) {
             try {
-                const result = await this.actor.saveCallerUserProfile(arg0);
+                const result = await this.actor.saveCallerUserProfile(to_candid_UserProfile_n11(this._uploadFile, this._downloadFile, arg0));
                 return result;
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
-            const result = await this.actor.saveCallerUserProfile(arg0);
+            const result = await this.actor.saveCallerUserProfile(to_candid_UserProfile_n11(this._uploadFile, this._downloadFile, arg0));
             return result;
         }
     }
@@ -322,6 +434,20 @@ export class Backend implements backendInterface {
             return result;
         }
     }
+    async setRelationshipStatus(arg0: RelationshipStatus): Promise<void> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.setRelationshipStatus(arg0);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.setRelationshipStatus(arg0);
+            return result;
+        }
+    }
     async submitCheckIn(arg0: string, arg1: string): Promise<void> {
         if (this.processError) {
             try {
@@ -336,17 +462,67 @@ export class Backend implements backendInterface {
             return result;
         }
     }
+    async submitRSVP(arg0: string, arg1: boolean, arg2: string): Promise<void> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.submitRSVP(arg0, arg1, arg2);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.submitRSVP(arg0, arg1, arg2);
+            return result;
+        }
+    }
 }
-function from_candid_UserRole_n4(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _UserRole): UserRole {
-    return from_candid_variant_n5(_uploadFile, _downloadFile, value);
+function from_candid_UserProfile_n4(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _UserProfile): UserProfile {
+    return from_candid_record_n5(_uploadFile, _downloadFile, value);
+}
+function from_candid_UserRole_n9(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _UserRole): UserRole {
+    return from_candid_variant_n10(_uploadFile, _downloadFile, value);
 }
 function from_candid_opt_n3(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: [] | [_UserProfile]): UserProfile | null {
+    return value.length === 0 ? null : from_candid_UserProfile_n4(_uploadFile, _downloadFile, value[0]);
+}
+function from_candid_opt_n6(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: [] | [_RelationshipStatus]): RelationshipStatus | null {
     return value.length === 0 ? null : value[0];
 }
-function from_candid_opt_n6(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: [] | [Principal]): Principal | null {
+function from_candid_opt_n7(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: [] | [Principal]): Principal | null {
     return value.length === 0 ? null : value[0];
 }
-function from_candid_variant_n5(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
+function from_candid_opt_n8(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: [] | [bigint]): bigint | null {
+    return value.length === 0 ? null : value[0];
+}
+function from_candid_record_n5(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
+    relationship_status: [] | [_RelationshipStatus];
+    streak_count: bigint;
+    can_set_relationship_status: boolean;
+    premium: boolean;
+    partner_ref: [] | [Principal];
+    name: string;
+    last_checkin_date: [] | [bigint];
+}): {
+    relationship_status?: RelationshipStatus;
+    streak_count: bigint;
+    can_set_relationship_status: boolean;
+    premium: boolean;
+    partner_ref?: Principal;
+    name: string;
+    last_checkin_date?: bigint;
+} {
+    return {
+        relationship_status: record_opt_to_undefined(from_candid_opt_n6(_uploadFile, _downloadFile, value.relationship_status)),
+        streak_count: value.streak_count,
+        can_set_relationship_status: value.can_set_relationship_status,
+        premium: value.premium,
+        partner_ref: record_opt_to_undefined(from_candid_opt_n7(_uploadFile, _downloadFile, value.partner_ref)),
+        name: value.name,
+        last_checkin_date: record_opt_to_undefined(from_candid_opt_n8(_uploadFile, _downloadFile, value.last_checkin_date))
+    };
+}
+function from_candid_variant_n10(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
     admin: null;
 } | {
     user: null;
@@ -355,8 +531,38 @@ function from_candid_variant_n5(_uploadFile: (file: ExternalBlob) => Promise<Uin
 }): UserRole {
     return "admin" in value ? UserRole.admin : "user" in value ? UserRole.user : "guest" in value ? UserRole.guest : value;
 }
+function to_candid_UserProfile_n11(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: UserProfile): _UserProfile {
+    return to_candid_record_n12(_uploadFile, _downloadFile, value);
+}
 function to_candid_UserRole_n1(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: UserRole): _UserRole {
     return to_candid_variant_n2(_uploadFile, _downloadFile, value);
+}
+function to_candid_record_n12(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
+    relationship_status?: RelationshipStatus;
+    streak_count: bigint;
+    can_set_relationship_status: boolean;
+    premium: boolean;
+    partner_ref?: Principal;
+    name: string;
+    last_checkin_date?: bigint;
+}): {
+    relationship_status: [] | [_RelationshipStatus];
+    streak_count: bigint;
+    can_set_relationship_status: boolean;
+    premium: boolean;
+    partner_ref: [] | [Principal];
+    name: string;
+    last_checkin_date: [] | [bigint];
+} {
+    return {
+        relationship_status: value.relationship_status ? candid_some(value.relationship_status) : candid_none(),
+        streak_count: value.streak_count,
+        can_set_relationship_status: value.can_set_relationship_status,
+        premium: value.premium,
+        partner_ref: value.partner_ref ? candid_some(value.partner_ref) : candid_none(),
+        name: value.name,
+        last_checkin_date: value.last_checkin_date ? candid_some(value.last_checkin_date) : candid_none()
+    };
 }
 function to_candid_variant_n2(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: UserRole): {
     admin: null;

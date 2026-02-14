@@ -2,11 +2,10 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-update-the-frontend-check-in-composer-ux-to-support-premium-multiple-check-ins-per-day-free-users-see-a-completed-limit-state-after-1-check-in-premium-users-can-continue-to-submit-additional-check-ins-the-same-day",
-      "featureTitle": "Update the frontend check-in composer UX to support premium multiple check-ins per day: free users see a completed/limit state after 1 check-in; premium users can continue to submit additional check-ins the same day.",
+      "featureId": "feature-remove-the-footer-attribution-line-that-reads-year-heartsync-built-with-heart-icon-using-caffeine-ai-including-the-heart-icon-and-the-caffeine-ai-link-from-the-app-ui-footer-while-keeping-the-existing-created-by-angelica-arboleda-footer-line",
+      "featureTitle": "Remove the footer attribution line that reads “© {year} HeartSync. Built with [heart icon] using caffeine.ai” (including the heart icon and the caffeine.ai link) from the app UI footer, while keeping the existing “Created by Angelica Arboleda” footer line.",
       "files": [
-        "frontend/src/features/checkins/CheckInComposer.tsx",
-        "frontend/src/features/profile/useHasPremium.ts"
+        "frontend/src/components/layout/AppLayout.tsx"
       ],
       "components": [
         "authorization@4.0.0",
@@ -14,29 +13,11 @@
         "shadcn-ui@1.0.0",
         "build-template-react@1.0.0",
         "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0"
+        "github-export-icp-cli@1.0.0",
+        "invite-links@3.0.0"
       ],
       "testIds": [
-        "REQ-11"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-update-the-today-s-status-display-to-handle-multiple-check-ins-per-user-in-a-single-day-by-showing-the-most-recent-check-in-per-person-and-optionally-the-count-of-check-ins-submitted-today",
-      "featureTitle": "Update the “Today’s Status” display to handle multiple check-ins per user in a single day by showing the most recent check-in per person and optionally the count of check-ins submitted today.",
-      "files": [
-        "frontend/src/features/checkins/TodayStatusCard.tsx"
-      ],
-      "components": [
-        "authorization@4.0.0",
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0"
-      ],
-      "testIds": [
-        "REQ-12"
+        "REQ-31"
       ],
       "confidence": "high"
     }

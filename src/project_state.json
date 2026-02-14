@@ -1,12 +1,24 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 5,
-  "summary": "Relationship app for two connected users to do a daily emotional check-in (emoji selection + short message), with authentication, a Firebase backend, and a premium tier that unlocks multiple check-ins per day (free users limited to 1/day).",
+  "projectStateVersion": 15,
+  "summary": "Relationship app for two connected users to do a daily emotional check-in (emoji selection + short message), with authentication, a Firebase/Firestore backend, premium tier for multiple check-ins per day, plus an Emotional Map page, a Settings option to remove/disconnect a partner, a shared relationship status chosen by the invited partner during pairing and displayed on Home, and a shared daily streak feature that increments only when both partners check in on the same day and is displayed on Home.",
   "architectural_notes": [
     "Use Firebase as the backend (authentication + data storage) for users, couple connections, and daily check-ins.",
-    "Introduce a per-user premium entitlement flag (e.g., isPremium/subscriptionStatus) and enforce check-in limits based on entitlement (free: 1/day; premium: >1/day)."
+    "Introduce a per-user premium entitlement flag (e.g., isPremium/subscriptionStatus) and enforce check-in limits based on entitlement (free: 1/day; premium: >1/day).",
+    "EmotionalMap reads Firestore daily_checkins documents filtered to today by date and keyed by user_ref (DocumentReference), compares current user vs partner emoji and shows status UI.",
+    "Partner disconnect updates Users documents by nulling partner_ref on both sides; do not delete historical check-ins/journal entries; handle partner_ref already null.",
+    "Add Users.relationship_status (string) stored in both partner user docs; after pairing, invited user must choose a status; until set, show a 'waiting for partner' message and hide status when unpaired.",
+    "Add Users.streak_count (int) and Users.last_checkin_date (timestamp) in Firestore to support a shared couple streak.",
+    "On check-in submission: update caller last_checkin_date=now; if partner also has last_checkin_date=today then update BOTH users’ streak_count (if both checked in yesterday too, increment; else set to 1).",
+    "Streak reset rule: if a full day passes without both users completing a check-in, reset streak_count to 0 for both users (can be enforced via logic on next app open/check-in or via a scheduled/maintenance process).",
+    "Home UI: when paired, show a centered streak section with text '🔥 X days connected' or (if streak_count==0) 'Start your connection streak today 💛'; hide the section when unpaired; add a soft animation when streak increases.",
+    "Enforce that ONLY the invited user (the one who joins via invite code/token) is allowed/redirected to choose/set the initial relationship status; the inviter should not be able to access or set this status during the initial selection flow."
   ],
-  "known_issues": [],
+  "known_issues": [
+    "Build/generation failed for requested features (EmotionalMap + Remove Partner); needs retry/regeneration.",
+    "Error occurring in the 'Choose Relationship Status' flow; user requested a fix.",
+    "Relationship status selection is not correctly restricted to only the invited user who joined via invite code/token; needs fix so only that user can choose/set the status."
+  ],
   "isFixRequest": false,
   "existing_features": [
     {
@@ -62,6 +74,102 @@
       "title": "Update the “Today’s Status” display to handle multiple check-ins per user in a single day by showing the most recent check-in per person and optionally the count of check-ins submitted today.",
       "reqIds": [
         "REQ-12"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-a-new-paired-user-view-called-emotionalmap-that-fetches-today-s-check-ins-for-the-current-user-and-for-the-user-s-partner-compares-their-emojis-and-renders-a-minimal-clean-ui-with-both-emojis-large-and-centered-and-a-status-message-below",
+      "title": "Add a new paired-user view called \"EmotionalMap\" that fetches today’s check-ins for the current user and for the user’s partner, compares their emojis, and renders a minimal clean UI with both emojis large and centered and a status message below.",
+      "reqIds": [
+        "REQ-13"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-expose-the-emotionalmap-view-from-the-existing-paired-user-experience-currently-the-dashboard-only-paired-state-by-adding-a-simple-navigation-option-so-a-paired-user-can-switch-between-the-existing-dashboard-and-the-new-emotionalmap-view",
+      "title": "Expose the EmotionalMap view from the existing paired-user experience (currently the dashboard-only paired state) by adding a simple navigation option so a paired user can switch between the existing dashboard and the new EmotionalMap view.",
+      "reqIds": [
+        "REQ-14"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-a-remove-partner-control-in-a-settings-area-of-the-ui-that-shows-a-confirmation-dialog-are-you-sure-you-want-to-remove-your-partner-connection-and-on-confirm-calls-the-backend-disconnect-method-then-returns-the-user-to-the-app-s-home-state-and-shows-a-success-snackbar-toast-partner-removed-successfully",
+      "title": "Add a \"Remove Partner\" control in a Settings area of the UI that shows a confirmation dialog \"Are you sure you want to remove your partner connection?\" and, on confirm, calls the backend disconnect method; then returns the user to the app’s home state and shows a success snackbar/toast \"Partner removed successfully.\"",
+      "reqIds": [
+        "REQ-16"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-pairing-invite-acceptance-flow-so-that-after-user-b-joins-with-an-invite-token-the-app-redirects-only-user-b-the-invited-user-to-a-new-choose-relationship-status-page-view-while-user-a-stays-on-the-normal-paired-home-experience",
+      "title": "Update the pairing invite acceptance flow so that after User B joins with an invite token, the app redirects ONLY User B (the invited user) to a new \"Choose Relationship Status\" page/view, while User A stays on the normal paired home experience.",
+      "reqIds": [
+        "REQ-18"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-the-choose-relationship-status-page-view-with-clean-minimal-centered-options-friendship-almost-something-situationship-relationship-engaged-married-on-selection-save-the-value-to-both-users-and-then-navigate-to-home-while-showing-the-success-message-relationship-status-updated-successfully",
+      "title": "Implement the \"Choose Relationship Status\" page/view with clean, minimal, centered options: Friendship, Almost Something, Situationship, Relationship, Engaged, Married. On selection, save the value to BOTH users and then navigate to Home while showing the success message \"Relationship status updated successfully 💛\".",
+      "reqIds": [
+        "REQ-19"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-paired-home-experience-to-display-relationship-status-when-paired-show-status-relationship-status-when-a-status-exists-hide-the-entire-status-section-when-not-paired-and-when-paired-but-no-status-has-been-selected-yet-show-waiting-for-your-partner-to-choose-the-relationship-status",
+      "title": "Update the paired Home experience to display relationship status when paired: show \"Status: [relationship_status]\" when a status exists; hide the entire status section when not paired; and when paired but no status has been selected yet, show \"Waiting for your partner to choose the relationship status.\"",
+      "reqIds": [
+        "REQ-20"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-a-react-query-hook-to-fetch-the-shared-streak-state-from-the-backend-and-ensure-it-is-invalidated-refetched-after-a-successful-check-in-submission",
+      "title": "Create a React Query hook to fetch the shared streak state from the backend and ensure it is invalidated/refetched after a successful check-in submission.",
+      "reqIds": [
+        "REQ-25"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-paired-home-dashboard-ui-to-display-a-centered-streak-section-when-the-user-is-paired-show-x-days-connected-when-streak-count-0-show-start-your-connection-streak-today-when-streak-count-0-and-hide-the-entire-streak-section-when-the-user-has-no-partner",
+      "title": "Update the paired Home/Dashboard UI to display a centered streak section when the user is paired: show “🔥 X days connected” when `streak_count > 0`, show “Start your connection streak today 💛” when `streak_count == 0`, and hide the entire streak section when the user has no partner.",
+      "reqIds": [
+        "REQ-26"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-a-minimal-soft-animation-to-the-streak-ui-that-plays-when-the-displayed-streak-value-increases-e-g-subtle-scale-fade-pulse-without-being-distracting-or-affecting-layout-stability",
+      "title": "Add a minimal, soft animation to the streak UI that plays when the displayed streak value increases (e.g., subtle scale/fade/pulse), without being distracting or affecting layout stability.",
+      "reqIds": [
+        "REQ-27"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-fix-the-relationship-status-selection-logic-so-that-only-the-invited-user-who-joined-via-an-invite-token-code-can-choose-set-the-initial-relationship-status-and-the-inviter-cannot-set-it",
+      "title": "Fix the relationship-status selection logic so that only the invited user who joined via an invite token/code can choose/set the initial relationship status, and the inviter cannot set it.",
+      "reqIds": [
+        "REQ-29"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-footer-credit-text-that-displays-created-by-angelica-arboleda-below-the-existing-footer-content-across-the-app",
+      "title": "Add footer credit text that displays \"Created by Angelica Arboleda\" below the existing footer content across the app.",
+      "reqIds": [
+        "REQ-30"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-remove-the-footer-attribution-line-that-reads-year-heartsync-built-with-heart-icon-using-caffeine-ai-including-the-heart-icon-and-the-caffeine-ai-link-from-the-app-ui-footer-while-keeping-the-existing-created-by-angelica-arboleda-footer-line",
+      "title": "Remove the footer attribution line that reads “© {year} HeartSync. Built with [heart icon] using caffeine.ai” (including the heart icon and the caffeine.ai link) from the app UI footer, while keeping the existing “Created by Angelica Arboleda” footer line.",
+      "reqIds": [
+        "REQ-31"
       ],
       "version": 1
     }
@@ -135,6 +243,98 @@
       "reqIds": [
         "REQ-10"
       ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-15",
+      "summary": "Add an EmotionalMap page that fetches today’s check-ins for current user and partner from Firestore (daily_checkins), compares emojis, and displays an in-sync vs different status message (or not-connected message).",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-16",
+      "summary": "Add a 'Remove Partner' feature in Settings: confirmation dialog, set both users’ partner_ref to null in Users collection, keep past check-ins/journals, redirect to Home, show success snackbar, and handle already-null partner_ref.",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-19",
+      "summary": "Implement a backend method that allows a caller to disconnect from their partner by removing the couple linkage for both principals, without deleting any existing check-ins.",
+      "reqIds": [
+        "REQ-15"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-20",
+      "summary": "Shared relationship status system: add relationship_status to both users; after invite acceptance, redirect invited partner to choose status; save to both users; display status on Home with waiting state until chosen.",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-21",
+      "summary": "Extend backend user/couple data to support a shared relationship status stored for both partners (partner_ref + relationship_status) and a way to identify that only the invited partner is allowed to choose/set the initial status after joining via invite token.",
+      "reqIds": [
+        "REQ-17"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-22",
+      "summary": "Shared daily streak: store streak_count + last_checkin_date in Users; increment/reset streak based on both partners completing daily check-ins; display streak section on Home with minimal centered UI and animation",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-23",
+      "summary": "Extend the backend user profile data model to store a shared streak state by adding `streak_count : Nat` and `last_checkin_date : ?Nat` (day index) (or equivalent persisted representation) for each user, while preserving all existing fields and behavior.",
+      "reqIds": [
+        "REQ-21"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-24",
+      "summary": "Implement shared streak update logic in the backend check-in submission flow (`submitCheckIn`) so that when a user submits a check-in it updates their `last_checkin_date` to the current day, checks whether both partners have at least one check-in for the current day, and if so updates `streak_count` for BOTH users according to: if both users also completed a check-in yesterday then increment streak by 1, otherwise set streak to 1.",
+      "reqIds": [
+        "REQ-22"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-25",
+      "summary": "Implement shared streak reset logic on the backend so that if one full calendar day passes without BOTH users completing a check-in on that day, the shared `streak_count` is reset to 0 for BOTH users. This reset must be applied deterministically based on stored dates/check-in history and should be enforced when streak data is read and/or when either partner submits a new check-in after a gap.",
+      "reqIds": [
+        "REQ-23"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-26",
+      "summary": "Add a backend query method to fetch the caller’s current shared streak state for display (at minimum `streak_count`), computed consistently with the increment/reset rules, and gated by the same access control requirements used for other user-level queries.",
+      "reqIds": [
+        "REQ-24"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-30",
+      "summary": "If existing persisted user profile state exists from previous deployments, add a conditional backend migration that initializes `streak_count` and `last_checkin_date` for all existing user profiles to safe defaults (`0` and `null`/unset respectively), per the project’s migration policy.",
+      "reqIds": [
+        "REQ-28"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-31",
+      "summary": "Add footer text on Home (and/or app footer) that says: \"creado por angelica arboleda\"",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-32",
+      "summary": "Remove the footer/credit line text: \"© 2026 HeartSync. Built with using caffeine.ai\" from the app UI",
+      "reqIds": [],
       "status": "pending"
     }
   ],
