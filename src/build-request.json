@@ -1,74 +1,109 @@
 {
   "kind": "build_request",
-  "title": "Allow paired users to change relationship status after initial selection",
+  "title": "Add avatar creation and profile avatars",
   "priority": "normal",
   "requirements": [
     {
-      "id": "REQ-44",
-      "text": "Update the backend relationship-status update logic so that, after the initial relationship status has been set, either partner can change the relationship status later and the new value is saved to BOTH user profiles.",
+      "id": "REQ-47",
+      "text": "Extend the backend `UserProfile` data model to persist a user avatar value, and expose it through existing profile query methods (`getCallerUserProfile`, `getUserProfile`).",
       "target": "backend",
       "source": {
         "messageIds": [
-          "recent-messages-6"
+          "msg-1"
         ],
         "quotes": [
-          "pon que se pueda cambiar el status"
+          "pon para crear avatars"
         ]
       },
       "acceptanceCriteria": [
-        "When no relationship status exists yet for the couple, calling `setRelationshipStatus` is still allowed only for the invited user (the user with `can_set_relationship_status == true`).",
-        "When a relationship status already exists for the couple, either paired user can successfully call the backend to change it.",
-        "On a successful change, the updated relationship status is persisted to both partners’ `relationship_status` fields.",
-        "Unauthorized callers (not paired, or not allowed to set the initial status when it is still unset) receive a clear error via backend trap."
+        "`backend/main.mo` `UserProfile` includes a new persisted field representing the user’s avatar (e.g., a Text value).",
+        "`getCallerUserProfile` and `getUserProfile` return the avatar field for existing users (including when unset).",
+        "Avatar data is stored per-user and does not affect pairing/check-in/streak logic."
       ]
     },
     {
-      "id": "REQ-45",
-      "text": "Update the frontend relationship-status mutation logic to support both flows: (1) initial status selection restricted to the invited user and (2) subsequent status changes allowed by either paired user when a status already exists.",
-      "target": "frontend",
+      "id": "REQ-48",
+      "text": "Update `saveCallerUserProfile` so callers can set/update their avatar while continuing to preserve all server-managed or pairing-related fields (e.g., `premium`, `partner_ref`, `relationship_status`, `streak_count`, `last_checkin_date`) exactly as the current implementation does for other editable fields.",
+      "target": "backend",
       "source": {
         "messageIds": [
-          "recent-messages-6"
+          "msg-1"
         ],
         "quotes": [
-          "pon que se pueda cambiar el status"
+          "pon para crear avatars"
         ]
       },
       "acceptanceCriteria": [
-        "If no relationship status exists yet, attempting to set it from a user who is not the invited user is blocked with a clear English error message.",
-        "If a relationship status already exists, either paired user can submit a status change successfully from the UI.",
-        "After a successful status change, React Query invalidates/refetches `['relationshipStatus']`, `['currentUserProfile']`, and any partner/profile queries needed so the new status (and header heart color) updates immediately without a hard refresh."
+        "Saving a profile updates only user-editable fields (name, country, avatar) and preserves existing values for premium/pairing/relationship/streak fields.",
+        "Backend rejects invalid avatar payloads with a clear trap message (English) if validation is implemented.",
+        "If a user has no prior profile, the created default profile includes a safe default avatar value (or empty/unset per the chosen representation)."
       ]
     },
     {
-      "id": "REQ-46",
-      "text": "Add a Settings UI control that allows a paired user to change the existing relationship status (using the same set of status options already used in the app), and show an English success toast after saving.",
-      "target": "frontend",
+      "id": "REQ-49",
+      "text": "Add a conditional migration for existing persisted user profile state to initialize the new avatar field to a safe default for all existing users, following the project’s migration policy.",
+      "target": "backend",
       "source": {
         "messageIds": [
-          "recent-messages-6"
+          "msg-1"
         ],
         "quotes": [
-          "pon que se pueda cambiar el status"
+          "pon para crear avatars"
         ]
       },
       "acceptanceCriteria": [
-        "In Settings, when the user is paired and a relationship status exists, a \"Change Relationship Status\" control is visible.",
-        "Invoking the control presents the existing relationship options (Friendship, Almost Something, Situationship, Relationship, Engaged, Married) and saves the selection.",
-        "On success, the UI shows a toast: \"Relationship status updated successfully 💛\" and the displayed status/heart color updates to match the new value.",
-        "If the user is not paired, the Settings status-change control is hidden or disabled in a way consistent with the rest of the Settings page patterns."
+        "If old state exists, upgrading does not trap due to missing avatar data.",
+        "Existing users keep all previously stored fields unchanged, with avatar initialized to the default.",
+        "New deployments (no prior state) do not require migration to function."
+      ]
+    },
+    {
+      "id": "REQ-50",
+      "text": "Add a frontend avatar creation/selection UI that lets an authenticated user set or change their avatar and saves it using the existing profile save flow.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "pon para crear avatars"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Profile setup and/or Settings provides an avatar control where the user can create/select an avatar and persist it via the profile save mutation.",
+        "After saving, the current user profile query is invalidated/refetched and the updated avatar is shown without a full page reload.",
+        "All user-facing UI strings introduced for avatar creation are in English."
+      ]
+    },
+    {
+      "id": "REQ-51",
+      "text": "Display user avatars in the paired experience using existing profile data: show the current user avatar and partner avatar wherever the app presents identity context (e.g., header/connection area), with sensible fallbacks when an avatar is not set.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "pon para crear avatars"
+        ]
+      },
+      "acceptanceCriteria": [
+        "When paired, the UI can render both the caller’s avatar and the partner’s avatar using `useGetCallerUserProfile` and partner profile data from `usePairingStatus`.",
+        "If either avatar is missing/unset, the UI renders a consistent fallback (e.g., initials/placeholder) without breaking layout.",
+        "Avatar rendering does not require any backend image hosting; it uses the stored avatar representation."
       ]
     }
   ],
   "constraints": [
-    "Backend must remain a single Motoko actor in `backend/main.mo` (no additional backend services).",
-    "Do not edit files under `frontend/src/components/ui` or any other immutable frontend paths listed in SYSTEM_CONTEXT.",
-    "Use English for any user-facing UI text added/changed."
+    "Backend must remain a single Motoko actor with all logic in `backend/main.mo`.",
+    "Only add/modify `backend/migration.mo` if required to safely upgrade existing persisted state (conditional migration policy).",
+    "Do not edit frontend files under `frontend/src/components/ui` or any other immutable paths listed in SYSTEM_CONTEXT.",
+    "Use English for any user-facing text introduced by this change."
   ],
   "nonGoals": [
-    "Do not add new relationship status options beyond the existing list.",
-    "Do not add third-party integrations or notifications related to status changes.",
-    "Do not redesign unrelated areas of the app (pairing, check-ins, streak) beyond what is needed to support changing the relationship status."
+    "Implementing third-party avatar services or external image hosting/storage.",
+    "Adding third-party authentication providers (only Internet Identity is supported).",
+    "Building real-time avatar syncing beyond the existing React Query refetch/invalidation behavior."
   ],
   "imageRequirements": {
     "required": [],

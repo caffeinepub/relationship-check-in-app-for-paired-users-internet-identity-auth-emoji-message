@@ -12,6 +12,7 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Loader2 } from 'lucide-react';
 import { CountriesMapSelector } from '../country/CountriesMapSelector';
+import { AvatarPicker } from './AvatarPicker';
 import { useSaveCallerUserProfile } from './useSaveCallerUserProfile';
 import { useGetCallerUserProfile } from './useGetCallerUserProfile';
 
@@ -23,20 +24,22 @@ export function ProfileSetupDialog({ open }: ProfileSetupDialogProps) {
   const { data: existingProfile } = useGetCallerUserProfile();
   const [name, setName] = useState('');
   const [country, setCountry] = useState<string>('');
+  const [avatar, setAvatar] = useState<string>('');
   const saveMutation = useSaveCallerUserProfile();
 
-  // Prefill name if profile exists but country is missing
+  // Prefill fields if profile exists but country is missing
   useEffect(() => {
     if (existingProfile) {
       setName(existingProfile.name || '');
       setCountry(existingProfile.country || '');
+      setAvatar(existingProfile.avatar || '');
     }
   }, [existingProfile]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (name.trim() && country) {
-      saveMutation.mutate({ name: name.trim(), country });
+      saveMutation.mutate({ name: name.trim(), country, avatar });
     }
   };
 
@@ -75,6 +78,13 @@ export function ProfileSetupDialog({ open }: ProfileSetupDialogProps) {
                 autoFocus={!existingProfile?.name}
               />
             </div>
+
+            <AvatarPicker
+              value={avatar}
+              onChange={setAvatar}
+              userName={name}
+              disabled={saveMutation.isPending}
+            />
 
             <CountriesMapSelector
               value={country}

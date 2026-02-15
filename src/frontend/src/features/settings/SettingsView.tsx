@@ -18,6 +18,7 @@ import { usePairingStatus } from '../pairing/usePairingStatus';
 import { useRelationshipStatusState } from '../relationshipStatus/useRelationshipStatusState';
 import { ChangeRelationshipStatusControl } from '../relationshipStatus/ChangeRelationshipStatusControl';
 import { CountriesMapSelector } from '../country/CountriesMapSelector';
+import { AvatarPicker } from '../profile/AvatarPicker';
 import { getCountryByCode } from '../country/countries';
 import { Loader2, UserX, Save } from 'lucide-react';
 import { toast } from 'sonner';
@@ -30,6 +31,8 @@ export function SettingsView({ onDisconnectSuccess }: SettingsViewProps) {
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [editingCountry, setEditingCountry] = useState(false);
   const [selectedCountry, setSelectedCountry] = useState<string>('');
+  const [editingAvatar, setEditingAvatar] = useState(false);
+  const [selectedAvatar, setSelectedAvatar] = useState<string>('');
   
   const disconnectMutation = useDisconnectPartner();
   const { data: userProfile } = useGetCallerUserProfile();
@@ -39,6 +42,7 @@ export function SettingsView({ onDisconnectSuccess }: SettingsViewProps) {
 
   const currentCountry = userProfile?.country;
   const currentCountryName = currentCountry ? getCountryByCode(currentCountry)?.name : 'Not set';
+  const currentAvatar = userProfile?.avatar || '';
 
   const handleConfirmDisconnect = async () => {
     try {
@@ -72,6 +76,7 @@ export function SettingsView({ onDisconnectSuccess }: SettingsViewProps) {
       await saveProfileMutation.mutateAsync({
         name: userProfile.name,
         country: selectedCountry,
+        avatar: currentAvatar,
       });
       toast.success('Country updated successfully.');
       setEditingCountry(false);
@@ -88,12 +93,105 @@ export function SettingsView({ onDisconnectSuccess }: SettingsViewProps) {
     setSelectedCountry('');
   };
 
+  const handleEditAvatar = () => {
+    setSelectedAvatar(currentAvatar);
+    setEditingAvatar(true);
+  };
+
+  const handleSaveAvatar = async () => {
+    if (!userProfile) {
+      toast.error('Profile not found.');
+      return;
+    }
+    
+    try {
+      await saveProfileMutation.mutateAsync({
+        name: userProfile.name,
+        country: userProfile.country,
+        avatar: selectedAvatar,
+      });
+      toast.success('Avatar updated successfully.');
+      setEditingAvatar(false);
+    } catch (error: any) {
+      toast.error('Failed to update avatar. Please try again.');
+    }
+  };
+
+  const handleCancelAvatarEdit = () => {
+    setEditingAvatar(false);
+    setSelectedAvatar('');
+  };
+
   return (
     <div className="max-w-2xl mx-auto space-y-6">
       <div className="text-center space-y-2">
         <h1 className="text-3xl font-bold tracking-tight">Settings</h1>
         <p className="text-muted-foreground">Manage your connection and preferences</p>
       </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Avatar</CardTitle>
+          <CardDescription>Your profile avatar</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {!editingAvatar ? (
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-2xl">
+                  {currentAvatar || (userProfile?.name ? userProfile.name[0].toUpperCase() : '👤')}
+                </div>
+                <div>
+                  <p className="font-medium">
+                    {currentAvatar ? 'Custom avatar' : 'Default avatar'}
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    {currentAvatar ? 'Using selected emoji' : 'Using first letter of name'}
+                  </p>
+                </div>
+              </div>
+              <Button onClick={handleEditAvatar} variant="outline">
+                Edit
+              </Button>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              <AvatarPicker
+                value={selectedAvatar}
+                onChange={setSelectedAvatar}
+                userName={userProfile?.name || ''}
+                disabled={saveProfileMutation.isPending}
+              />
+              <div className="flex gap-2">
+                <Button
+                  onClick={handleSaveAvatar}
+                  disabled={saveProfileMutation.isPending}
+                  className="flex-1"
+                >
+                  {saveProfileMutation.isPending ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Saving...
+                    </>
+                  ) : (
+                    <>
+                      <Save className="mr-2 h-4 w-4" />
+                      Save
+                    </>
+                  )}
+                </Button>
+                <Button
+                  onClick={handleCancelAvatarEdit}
+                  variant="outline"
+                  disabled={saveProfileMutation.isPending}
+                >
+                  Cancel
+                </Button>
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader>

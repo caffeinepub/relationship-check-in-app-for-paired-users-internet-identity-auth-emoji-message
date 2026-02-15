@@ -5,6 +5,7 @@ import { useGetCallerUserProfile } from '../../features/profile/useGetCallerUser
 import { useRelationshipStatusState } from '../../features/relationshipStatus/useRelationshipStatusState';
 import { countryCodeToFlagEmoji } from '../../features/country/flagEmoji';
 import { getRelationshipStatusColors } from '../../features/relationshipStatus/relationshipStatusColors';
+import { AvatarBadge } from '../avatars/AvatarBadge';
 import { Heart } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Toaster } from '@/components/ui/sonner';
@@ -16,7 +17,7 @@ interface AppLayoutProps {
 
 export function AppLayout({ children, showAuthButton = true }: AppLayoutProps) {
   const { identity } = useInternetIdentity();
-  const { isPaired, partnerName, partnerCountry } = usePairingStatus();
+  const { isPaired, partnerName, partnerCountry, partnerProfile } = usePairingStatus();
   const { data: userProfile } = useGetCallerUserProfile();
   const { relationshipStatus } = useRelationshipStatusState();
   
@@ -36,6 +37,9 @@ export function AppLayout({ children, showAuthButton = true }: AppLayoutProps) {
   
   const heartColors = getRelationshipStatusColors(relationshipStatus?.status);
 
+  // Show avatars when paired
+  const showAvatars = isAuthenticated && isPaired && userProfile && partnerProfile;
+
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b border-border/40 bg-card/50 backdrop-blur supports-[backdrop-filter]:bg-card/30">
@@ -54,6 +58,29 @@ export function AppLayout({ children, showAuthButton = true }: AppLayoutProps) {
                 <span className="text-4xl" role="img" aria-label="Partner country flag">
                   {partnerFlag}
                 </span>
+              </div>
+            )}
+
+            {/* Avatars Row (when paired) */}
+            {showAvatars && (
+              <div className="flex items-center justify-center gap-4">
+                <div className="flex flex-col items-center gap-1">
+                  <AvatarBadge 
+                    avatar={userProfile.avatar} 
+                    name={userProfile.name}
+                    size="lg"
+                  />
+                  <span className="text-xs text-muted-foreground">You</span>
+                </div>
+                <Heart className="h-5 w-5 text-primary/50" />
+                <div className="flex flex-col items-center gap-1">
+                  <AvatarBadge 
+                    avatar={partnerProfile.avatar} 
+                    name={partnerProfile.name}
+                    size="lg"
+                  />
+                  <span className="text-xs text-muted-foreground">{partnerProfile.name}</span>
+                </div>
               </div>
             )}
 

@@ -1,11 +1,13 @@
 # Specification
 
 ## Summary
-**Goal:** Let paired users change their relationship status after it has been initially set, while keeping the initial selection restricted to the invited user.
+**Goal:** Add persisted profile avatars so users can create/select an avatar, save it to their profile, and see both their own and their partner’s avatar in paired UI contexts.
 
 **Planned changes:**
-- Backend: adjust relationship-status update rules so only the invited user can set the initial status, but either paired user can change it once a status exists; persist updates to both user profiles and return clear errors for unauthorized calls.
-- Frontend: update relationship-status mutation handling to support both initial-set and subsequent-change flows, including clear English errors and React Query invalidation/refetch so the status and heart color update immediately.
-- Frontend Settings: add a “Change Relationship Status” control visible only when paired and a status exists, reuse the existing status options, and show an English success toast after saving.
+- Extend the backend `UserProfile` model to include a persisted avatar field and return it from `getCallerUserProfile` and `getUserProfile`.
+- Update `saveCallerUserProfile` to allow setting/updating the avatar while preserving all server-managed and pairing/relationship/streak fields as currently handled.
+- Add a conditional backend migration to safely initialize the new avatar field for existing persisted profiles during upgrade.
+- Add frontend UI in profile setup and/or Settings to create/select an avatar and save it through the existing profile save flow, with React Query refetch/invalidation to show changes without full reload.
+- Render the caller and partner avatars in paired identity contexts (e.g., header/connection area) using existing profile queries, with consistent fallback when an avatar is unset.
 
-**User-visible outcome:** If you’re paired and a relationship status is already set, you can change it from Settings and both profiles (and the heart/status UI) update immediately; if it’s not set yet, only the invited user can set it initially.
+**User-visible outcome:** Authenticated users can choose/change an avatar in their profile, and when paired they will see both their own and their partner’s avatar displayed with sensible placeholders when missing.

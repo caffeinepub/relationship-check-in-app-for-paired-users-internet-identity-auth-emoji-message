@@ -120,6 +120,7 @@ export interface UserProfile {
     partner_ref?: Principal;
     name: string;
     last_checkin_date?: bigint;
+    avatar: string;
 }
 export enum UserRole {
     admin = "admin",
@@ -141,6 +142,7 @@ export interface backendInterface {
     getRelationshipStatus(): Promise<RelationshipStatus | null>;
     getSharedStreak(): Promise<bigint>;
     getTodayCheckIns(): Promise<Array<CheckIn>>;
+    getUserAvatar(arg0: null): Promise<string | null>;
     getUserProfile(user: Principal): Promise<UserProfile | null>;
     hasPremium(): Promise<boolean>;
     isCallerAdmin(): Promise<boolean>;
@@ -350,6 +352,20 @@ export class Backend implements backendInterface {
             return result;
         }
     }
+    async getUserAvatar(arg0: null): Promise<string | null> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.getUserAvatar(arg0);
+                return from_candid_opt_n11(this._uploadFile, this._downloadFile, result);
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.getUserAvatar(arg0);
+            return from_candid_opt_n11(this._uploadFile, this._downloadFile, result);
+        }
+    }
     async getUserProfile(arg0: Principal): Promise<UserProfile | null> {
         if (this.processError) {
             try {
@@ -409,14 +425,14 @@ export class Backend implements backendInterface {
     async saveCallerUserProfile(arg0: UserProfile): Promise<void> {
         if (this.processError) {
             try {
-                const result = await this.actor.saveCallerUserProfile(to_candid_UserProfile_n11(this._uploadFile, this._downloadFile, arg0));
+                const result = await this.actor.saveCallerUserProfile(to_candid_UserProfile_n12(this._uploadFile, this._downloadFile, arg0));
                 return result;
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
-            const result = await this.actor.saveCallerUserProfile(to_candid_UserProfile_n11(this._uploadFile, this._downloadFile, arg0));
+            const result = await this.actor.saveCallerUserProfile(to_candid_UserProfile_n12(this._uploadFile, this._downloadFile, arg0));
             return result;
         }
     }
@@ -483,6 +499,9 @@ function from_candid_UserProfile_n4(_uploadFile: (file: ExternalBlob) => Promise
 function from_candid_UserRole_n9(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _UserRole): UserRole {
     return from_candid_variant_n10(_uploadFile, _downloadFile, value);
 }
+function from_candid_opt_n11(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: [] | [string]): string | null {
+    return value.length === 0 ? null : value[0];
+}
 function from_candid_opt_n3(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: [] | [_UserProfile]): UserProfile | null {
     return value.length === 0 ? null : from_candid_UserProfile_n4(_uploadFile, _downloadFile, value[0]);
 }
@@ -503,6 +522,7 @@ function from_candid_record_n5(_uploadFile: (file: ExternalBlob) => Promise<Uint
     partner_ref: [] | [Principal];
     name: string;
     last_checkin_date: [] | [bigint];
+    avatar: string;
 }): {
     relationship_status?: RelationshipStatus;
     streak_count: bigint;
@@ -511,6 +531,7 @@ function from_candid_record_n5(_uploadFile: (file: ExternalBlob) => Promise<Uint
     partner_ref?: Principal;
     name: string;
     last_checkin_date?: bigint;
+    avatar: string;
 } {
     return {
         relationship_status: record_opt_to_undefined(from_candid_opt_n6(_uploadFile, _downloadFile, value.relationship_status)),
@@ -519,7 +540,8 @@ function from_candid_record_n5(_uploadFile: (file: ExternalBlob) => Promise<Uint
         premium: value.premium,
         partner_ref: record_opt_to_undefined(from_candid_opt_n7(_uploadFile, _downloadFile, value.partner_ref)),
         name: value.name,
-        last_checkin_date: record_opt_to_undefined(from_candid_opt_n8(_uploadFile, _downloadFile, value.last_checkin_date))
+        last_checkin_date: record_opt_to_undefined(from_candid_opt_n8(_uploadFile, _downloadFile, value.last_checkin_date)),
+        avatar: value.avatar
     };
 }
 function from_candid_variant_n10(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
@@ -531,13 +553,13 @@ function from_candid_variant_n10(_uploadFile: (file: ExternalBlob) => Promise<Ui
 }): UserRole {
     return "admin" in value ? UserRole.admin : "user" in value ? UserRole.user : "guest" in value ? UserRole.guest : value;
 }
-function to_candid_UserProfile_n11(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: UserProfile): _UserProfile {
-    return to_candid_record_n12(_uploadFile, _downloadFile, value);
+function to_candid_UserProfile_n12(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: UserProfile): _UserProfile {
+    return to_candid_record_n13(_uploadFile, _downloadFile, value);
 }
 function to_candid_UserRole_n1(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: UserRole): _UserRole {
     return to_candid_variant_n2(_uploadFile, _downloadFile, value);
 }
-function to_candid_record_n12(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
+function to_candid_record_n13(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
     relationship_status?: RelationshipStatus;
     streak_count: bigint;
     country: string;
@@ -545,6 +567,7 @@ function to_candid_record_n12(_uploadFile: (file: ExternalBlob) => Promise<Uint8
     partner_ref?: Principal;
     name: string;
     last_checkin_date?: bigint;
+    avatar: string;
 }): {
     relationship_status: [] | [_RelationshipStatus];
     streak_count: bigint;
@@ -553,6 +576,7 @@ function to_candid_record_n12(_uploadFile: (file: ExternalBlob) => Promise<Uint8
     partner_ref: [] | [Principal];
     name: string;
     last_checkin_date: [] | [bigint];
+    avatar: string;
 } {
     return {
         relationship_status: value.relationship_status ? candid_some(value.relationship_status) : candid_none(),
@@ -561,7 +585,8 @@ function to_candid_record_n12(_uploadFile: (file: ExternalBlob) => Promise<Uint8
         premium: value.premium,
         partner_ref: value.partner_ref ? candid_some(value.partner_ref) : candid_none(),
         name: value.name,
-        last_checkin_date: value.last_checkin_date ? candid_some(value.last_checkin_date) : candid_none()
+        last_checkin_date: value.last_checkin_date ? candid_some(value.last_checkin_date) : candid_none(),
+        avatar: value.avatar
     };
 }
 function to_candid_variant_n2(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: UserRole): {

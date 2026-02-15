@@ -8,12 +8,11 @@ import Order "mo:core/Order";
 import Nat "mo:core/Nat";
 import Runtime "mo:core/Runtime";
 import Principal "mo:core/Principal";
-import MixinAuthorization "authorization/MixinAuthorization";
-import AccessControl "authorization/access-control";
-
-import InviteLinksModule "invite-links/invite-links-module";
 import Random "mo:core/Random";
 import Migration "migration";
+import MixinAuthorization "authorization/MixinAuthorization";
+import AccessControl "authorization/access-control";
+import InviteLinksModule "invite-links/invite-links-module";
 
 (with migration = Migration.run)
 actor {
@@ -34,6 +33,7 @@ actor {
     streak_count : Nat;
     last_checkin_date : ?Nat;
     country : Text;
+    avatar : Text;
   };
 
   public type CheckIn = {
@@ -56,7 +56,6 @@ actor {
 
   public type Token = Text;
 
-  // Invite links and RSVP operations
   public shared ({ caller }) func generateInviteCode() : async Text {
     if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
       Runtime.trap("Unauthorized: Only admins can generate invite codes");
@@ -68,8 +67,8 @@ actor {
   };
 
   public shared ({ caller }) func submitRSVP(name : Text, attending : Bool, inviteCode : Text) : async () {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
-      Runtime.trap("Unauthorized: Only users can submit RSVPs");
+    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+      Runtime.trap("Unauthorized: Only admins can submit RSVPs");
     };
     InviteLinksModule.submitRSVP(inviteLinksState, name, attending, inviteCode);
   };
@@ -88,12 +87,19 @@ actor {
     InviteLinksModule.getInviteCodes(inviteLinksState);
   };
 
-  // User Profile Management
   public query ({ caller }) func getCallerUserProfile() : async ?UserProfile {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: Only users can view profiles");
     };
     userProfiles.get(caller);
+  };
+
+  public query ({ caller }) func getUserAvatar(_ : ()) : async ?Text {
+    let profile = userProfiles.get(caller);
+    switch (profile) {
+      case (null) { null };
+      case (?profile) { ?profile.avatar };
+    };
   };
 
   public query ({ caller }) func hasPremium() : async Bool {
@@ -133,6 +139,7 @@ actor {
           streak_count = 0;
           last_checkin_date = null;
           country = profile.country;
+          avatar = profile.avatar;
         };
       };
       case (?existingProfile) {
@@ -144,6 +151,7 @@ actor {
           streak_count = existingProfile.streak_count;
           last_checkin_date = existingProfile.last_checkin_date;
           country = profile.country;
+          avatar = profile.avatar;
         };
       };
     };
@@ -165,7 +173,6 @@ actor {
     };
   };
 
-  // Pairing Operations
   public shared ({ caller }) func generateInviteToken() : async Token {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: Only users can generate invite tokens");
@@ -181,6 +188,7 @@ actor {
           streak_count = 0;
           last_checkin_date = null;
           country = "";
+          avatar = "";
         };
         userProfiles.add(caller, newProfile);
         let token = caller.toText();
@@ -218,6 +226,7 @@ actor {
           streak_count = 0;
           last_checkin_date = null;
           country = "";
+          avatar = "";
         };
         userProfiles.add(caller, newProfile);
       };
@@ -240,6 +249,7 @@ actor {
               streak_count = 0;
               last_checkin_date = null;
               country = "";
+              avatar = "";
             };
             userProfiles.add(inviter, newProfile);
             newProfile;
@@ -260,6 +270,7 @@ actor {
           streak_count = 0;
           last_checkin_date = null;
           country = "";
+          avatar = "";
         };
 
         userProfiles.add(inviter, inviterProfile);
@@ -358,7 +369,6 @@ actor {
     };
   };
 
-  // Check-in Operations
   public shared ({ caller }) func submitCheckIn(emoji : Text, message : Text) : async () {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: Only users can submit check-ins");
@@ -405,7 +415,6 @@ actor {
     entries.add(checkIn);
     checkIns.add(caller, entries);
 
-    // Update streak logic
     updatePartnerStreaks(caller, partner, today);
   };
 

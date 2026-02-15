@@ -33,6 +33,7 @@ export const UserProfile = IDL.Record({
   'partner_ref' : IDL.Opt(IDL.Principal),
   'name' : IDL.Text,
   'last_checkin_date' : IDL.Opt(IDL.Nat),
+  'avatar' : IDL.Text,
 });
 export const CheckIn = IDL.Record({
   'emoji' : IDL.Text,
@@ -65,6 +66,7 @@ export const idlService = IDL.Service({
     ),
   'getSharedStreak' : IDL.Func([], [IDL.Nat], ['query']),
   'getTodayCheckIns' : IDL.Func([], [IDL.Vec(CheckIn)], ['query']),
+  'getUserAvatar' : IDL.Func([IDL.Null], [IDL.Opt(IDL.Text)], ['query']),
   'getUserProfile' : IDL.Func(
       [IDL.Principal],
       [IDL.Opt(UserProfile)],
@@ -108,6 +110,7 @@ export const idlFactory = ({ IDL }) => {
     'partner_ref' : IDL.Opt(IDL.Principal),
     'name' : IDL.Text,
     'last_checkin_date' : IDL.Opt(IDL.Nat),
+    'avatar' : IDL.Text,
   });
   const CheckIn = IDL.Record({
     'emoji' : IDL.Text,
@@ -140,6 +143,7 @@ export const idlFactory = ({ IDL }) => {
       ),
     'getSharedStreak' : IDL.Func([], [IDL.Nat], ['query']),
     'getTodayCheckIns' : IDL.Func([], [IDL.Vec(CheckIn)], ['query']),
+    'getUserAvatar' : IDL.Func([IDL.Null], [IDL.Opt(IDL.Text)], ['query']),
     'getUserProfile' : IDL.Func(
         [IDL.Principal],
         [IDL.Opt(UserProfile)],

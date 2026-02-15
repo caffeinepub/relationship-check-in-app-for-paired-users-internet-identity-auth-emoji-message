@@ -41,6 +41,7 @@ export interface UserProfile {
   'partner_ref' : [] | [Principal],
   'name' : string,
   'last_checkin_date' : [] | [bigint],
+  'avatar' : string,
 }
 export type UserRole = { 'admin' : null } |
   { 'user' : null } |
@@ -60,6 +61,7 @@ export interface _SERVICE {
   'getRelationshipStatus' : ActorMethod<[], [] | [RelationshipStatus]>,
   'getSharedStreak' : ActorMethod<[], bigint>,
   'getTodayCheckIns' : ActorMethod<[], Array<CheckIn>>,
+  'getUserAvatar' : ActorMethod<[null], [] | [string]>,
   'getUserProfile' : ActorMethod<[Principal], [] | [UserProfile]>,
   'hasPremium' : ActorMethod<[], boolean>,
   'isCallerAdmin' : ActorMethod<[], boolean>,

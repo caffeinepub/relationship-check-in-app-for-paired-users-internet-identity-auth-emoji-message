@@ -1,58 +1,72 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Enable relationship status changes for paired users in UI",
+  "title": "Avatar creation UI and paired avatar display",
   "requirements": [
     {
-      "id": "REQ-45",
-      "summary": "Update relationship-status mutation logic to allow initial set only by invited user, and allow later changes by either paired user once a status exists.",
+      "id": "REQ-50",
+      "summary": "Add avatar creation/selection controls to profile setup and settings, persisting via the existing save profile flow with React Query refetch.",
       "acceptanceCriteria": [
-        "If no relationship status exists yet, attempting to set it from a user who is not the invited user is blocked with a clear English error message.",
-        "If a relationship status already exists, either paired user can submit a status change successfully from the UI.",
-        "After a successful status change, React Query invalidates/refetches ['relationshipStatus'], ['currentUserProfile'], and any partner/profile queries needed so the new status (and header heart color) updates immediately without a hard refresh."
+        "Profile setup and/or Settings provides an avatar control where the user can create/select an avatar and persist it via the profile save mutation.",
+        "After saving, the current user profile query is invalidated/refetched and the updated avatar is shown without a full page reload.",
+        "All user-facing UI strings introduced for avatar creation are in English."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/features/relationshipStatus/useSetRelationshipStatus.ts",
-          "operation": "modify",
-          "description": "Adjust the mutation guard to support two flows: (1) if cached/fetched relationship status is null/unset, enforce \"invited user only\" (using the existing profile flag check); (2) if a relationship status already exists, allow the mutation for either paired user. Ensure errors are thrown in clear English when blocked."
-        },
-        {
-          "path": "frontend/src/features/relationshipStatus/useSetRelationshipStatus.ts",
-          "operation": "modify",
-          "description": "Strengthen React Query refresh behavior after a successful status change: invalidate/refetch ['relationshipStatus'], ['currentUserProfile'], and partner/profile-related queries (including parameterized partner profile keys) so the dashboard display and AppLayout heart color update immediately."
-        }
-      ]
-    },
-    {
-      "id": "REQ-46",
-      "summary": "Add a Settings control for paired users to change an existing relationship status and show an English success toast after saving.",
-      "acceptanceCriteria": [
-        "In Settings, when the user is paired and a relationship status exists, a \"Change Relationship Status\" control is visible.",
-        "Invoking the control presents the existing relationship options (Friendship, Almost Something, Situationship, Relationship, Engaged, Married) and saves the selection.",
-        "On success, the UI shows a toast: \"Relationship status updated successfully 💛\" and the displayed status/heart color updates to match the new value.",
-        "If the user is not paired, the Settings status-change control is hidden or disabled in a way consistent with the rest of the Settings page patterns."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/features/relationshipStatus/relationshipStatusOptions.ts",
+          "path": "frontend/src/features/profile/AvatarPicker.tsx",
           "operation": "create",
-          "description": "Create a shared, single source of truth for the existing relationship status options list used across the app (Friendship, Almost Something, Situationship, Relationship, Engaged, Married) to avoid duplication between the chooser and the new Settings control."
+          "description": "Create an avatar creation/selection component (stored-avatar representation as text, e.g., emoji/preset string) with a clear empty/default option and lightweight validation. Use shadcn-ui building blocks already present in the app for consistent inputs and buttons. Verify the component's usage instructions before implementing."
         },
         {
-          "path": "frontend/src/features/relationshipStatus/ChooseRelationshipStatusView.tsx",
-          "operation": "modify",
-          "description": "Refactor to import the shared relationship status options from the new options module so the chooser and Settings use the same list (no new options introduced). Keep all user-facing text in English."
-        },
-        {
-          "path": "frontend/src/features/relationshipStatus/ChangeRelationshipStatusControl.tsx",
+          "path": "frontend/src/features/profile/avatarUtils.ts",
           "operation": "create",
-          "description": "Add a Settings-ready UI control component that: shows \"Change Relationship Status\", presents the existing options for selection, calls the existing set-relationship-status mutation, and on success shows the toast \"Relationship status updated successfully 💛\". Use the app's existing UI primitives (without editing any immutable ui component files)."
+          "description": "Add small utilities for avatar normalization/validation and generating a consistent fallback avatar label when missing/unset. Ensure all defaults are safe and deterministic. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/features/profile/useSaveCallerUserProfile.ts",
+          "operation": "modify",
+          "description": "Extend the save profile hook to accept an avatar value and include it in the profile payload sent to the existing save flow. Prefer merging with any cached current profile data (via React Query) so unchanged fields remain stable on the frontend side, while still relying on the backend to preserve server-managed fields. Keep invalidation of ['currentUserProfile'] so the updated avatar shows without a full reload. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/features/profile/ProfileSetupDialog.tsx",
+          "operation": "modify",
+          "description": "Add the AvatarPicker control to the profile setup dialog and include avatar in the save mutation payload (English labels/help text). Keep existing name/country behavior and prevent modal dismissal while saving. Verify the component's usage instructions before implementing."
         },
         {
           "path": "frontend/src/features/settings/SettingsView.tsx",
           "operation": "modify",
-          "description": "Wire the new \"Change Relationship Status\" control into Settings: show it only when the user is paired and a relationship status exists (otherwise hide/disable consistent with Settings patterns). Ensure it uses the same option list and the status/heart color updates via the existing query invalidations."
+          "description": "Add an Avatar section to Settings that lets the authenticated user view, edit, and save their avatar using the same save profile flow (with toast feedback in English). Ensure saving triggers profile refetch via existing query invalidation. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Ensure the avatar UI is only reachable for authenticated users as part of the existing authenticated app flow (leveraging the authorization component’s authentication patterns already in use). No new routes required. Verify the component's usage instructions before implementing."
+        }
+      ]
+    },
+    {
+      "id": "REQ-51",
+      "summary": "Render current user and partner avatars in the paired identity context with consistent fallbacks and no image hosting.",
+      "acceptanceCriteria": [
+        "When paired, the UI can render both the caller’s avatar and the partner’s avatar using `useGetCallerUserProfile` and partner profile data from `usePairingStatus`.",
+        "If either avatar is missing/unset, the UI renders a consistent fallback (e.g., initials/placeholder) without breaking layout.",
+        "Avatar rendering does not require any backend image hosting; it uses the stored avatar representation."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/avatars/AvatarBadge.tsx",
+          "operation": "create",
+          "description": "Create a small presentational component to render an avatar from the stored text representation (e.g., emoji/preset) with a consistent fallback (e.g., initials) and stable sizing for headers. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/components/layout/AppLayout.tsx",
+          "operation": "modify",
+          "description": "Update the paired identity context in the header/connection area to show both the current user avatar and partner avatar using `useGetCallerUserProfile()` and `usePairingStatus().partnerProfile`. Use AvatarBadge and fall back gracefully when either avatar is missing/unset. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/features/pairing/usePairingStatus.ts",
+          "operation": "modify",
+          "description": "Expose partner avatar data in the pairing status return shape (derived from `partnerProfile`) to simplify consumption by identity-context UI. Keep existing query behavior and keys intact. Verify the component's usage instructions before implementing."
         }
       ]
     }

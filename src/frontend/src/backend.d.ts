@@ -38,6 +38,7 @@ export interface UserProfile {
     partner_ref?: Principal;
     name: string;
     last_checkin_date?: bigint;
+    avatar: string;
 }
 export enum UserRole {
     admin = "admin",
@@ -58,6 +59,7 @@ export interface backendInterface {
     getRelationshipStatus(): Promise<RelationshipStatus | null>;
     getSharedStreak(): Promise<bigint>;
     getTodayCheckIns(): Promise<Array<CheckIn>>;
+    getUserAvatar(arg0: null): Promise<string | null>;
     getUserProfile(user: Principal): Promise<UserProfile | null>;
     hasPremium(): Promise<boolean>;
     isCallerAdmin(): Promise<boolean>;

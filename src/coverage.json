@@ -1,50 +1,69 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-14T22:16:21.988Z",
+  "generatedAt": "2026-02-14T22:26:08.698Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 3,
+    "total": 5,
     "implemented": 2,
     "items": [
       {
-        "id": "REQ-44",
-        "summary": "Update the backend relationship-status update logic so that, after the initial relationship status has been set, either partner can change the relationship status later and the new value is saved to BOTH user profiles.",
+        "id": "REQ-47",
+        "summary": "Extend the backend `UserProfile` data model to persist a user avatar value, and expose it through existing profile query methods (`getCallerUserProfile`, `getUserProfile`).",
         "status": "unknown",
         "plannedFiles": [],
         "matchedFiles": []
       },
       {
-        "id": "REQ-45",
-        "summary": "Update the frontend relationship-status mutation logic to support both flows: (1) initial status selection restricted to the invited user and (2) subsequent status changes allowed by either paired user when a status already exists.",
+        "id": "REQ-48",
+        "summary": "Update `saveCallerUserProfile` so callers can set/update their avatar while continuing to preserve all server-managed or pairing-related fields (e.g., `premium`, `partner_ref`, `relationship_status`, `streak_count`, `last_checkin_date`) exactly as the current implementation does for other editable fields.",
+        "status": "unknown",
+        "plannedFiles": [],
+        "matchedFiles": []
+      },
+      {
+        "id": "REQ-49",
+        "summary": "Add a conditional migration for existing persisted user profile state to initialize the new avatar field to a safe default for all existing users, following the project’s migration policy.",
+        "status": "unknown",
+        "plannedFiles": [],
+        "matchedFiles": []
+      },
+      {
+        "id": "REQ-50",
+        "summary": "Add a frontend avatar creation/selection UI that lets an authenticated user set or change their avatar and saves it using the existing profile save flow.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/features/relationshipStatus/useSetRelationshipStatus.ts",
-          "frontend/src/features/relationshipStatus/useSetRelationshipStatus.ts"
+          "frontend/src/features/profile/AvatarPicker.tsx",
+          "frontend/src/features/profile/avatarUtils.ts",
+          "frontend/src/features/profile/useSaveCallerUserProfile.ts",
+          "frontend/src/features/profile/ProfileSetupDialog.tsx",
+          "frontend/src/features/settings/SettingsView.tsx",
+          "frontend/src/App.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/features/relationshipStatus/useSetRelationshipStatus.ts",
-          "frontend/src/features/relationshipStatus/useSetRelationshipStatus.ts"
+          "frontend/src/features/profile/AvatarPicker.tsx",
+          "frontend/src/features/profile/avatarUtils.ts",
+          "frontend/src/features/profile/useSaveCallerUserProfile.ts",
+          "frontend/src/features/profile/ProfileSetupDialog.tsx",
+          "frontend/src/features/settings/SettingsView.tsx"
         ]
       },
       {
-        "id": "REQ-46",
-        "summary": "Add a Settings UI control that allows a paired user to change the existing relationship status (using the same set of status options already used in the app), and show an English success toast after saving.",
+        "id": "REQ-51",
+        "summary": "Display user avatars in the paired experience using existing profile data: show the current user avatar and partner avatar wherever the app presents identity context (e.g., header/connection area), with sensible fallbacks when an avatar is not set.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/features/relationshipStatus/relationshipStatusOptions.ts",
-          "frontend/src/features/relationshipStatus/ChooseRelationshipStatusView.tsx",
-          "frontend/src/features/relationshipStatus/ChangeRelationshipStatusControl.tsx",
-          "frontend/src/features/settings/SettingsView.tsx"
+          "frontend/src/components/avatars/AvatarBadge.tsx",
+          "frontend/src/components/layout/AppLayout.tsx",
+          "frontend/src/features/pairing/usePairingStatus.ts"
         ],
         "matchedFiles": [
-          "frontend/src/features/relationshipStatus/relationshipStatusOptions.ts",
-          "frontend/src/features/relationshipStatus/ChooseRelationshipStatusView.tsx",
-          "frontend/src/features/relationshipStatus/ChangeRelationshipStatusControl.tsx",
-          "frontend/src/features/settings/SettingsView.tsx"
+          "frontend/src/components/avatars/AvatarBadge.tsx",
+          "frontend/src/components/layout/AppLayout.tsx",
+          "frontend/src/features/pairing/usePairingStatus.ts"
         ]
       }
     ]
@@ -56,17 +75,17 @@
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/src/App.tsx",
     "frontend/src/backend.d.ts",
     "frontend/src/backend.ts",
+    "frontend/src/components/avatars/AvatarBadge.tsx",
+    "frontend/src/components/layout/AppLayout.tsx",
     "frontend/src/declarations/backend.did.d.ts",
     "frontend/src/declarations/backend.did.js",
+    "frontend/src/features/pairing/usePairingStatus.ts",
+    "frontend/src/features/profile/AvatarPicker.tsx",
+    "frontend/src/features/profile/ProfileSetupDialog.tsx",
+    "frontend/src/features/profile/avatarUtils.ts",
     "frontend/src/features/profile/useSaveCallerUserProfile.ts",
-    "frontend/src/features/relationshipStatus/ChangeRelationshipStatusControl.tsx",
-    "frontend/src/features/relationshipStatus/ChooseRelationshipStatusView.tsx",
-    "frontend/src/features/relationshipStatus/relationshipStatusOptions.ts",
-    "frontend/src/features/relationshipStatus/useRelationshipStatusState.ts",
-    "frontend/src/features/relationshipStatus/useSetRelationshipStatus.ts",
     "frontend/src/features/settings/SettingsView.tsx",
     "project_state.json",
     "scratch/component-selection.json",

@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 23,
+  "projectStateVersion": 25,
   "summary": "Relationship app for two connected users to do a daily emotional check-in (emoji selection + short message), with authentication, a Firebase/Firestore backend, premium tier for multiple check-ins per day, plus an Emotional Map page, a Settings option to remove/disconnect a partner, a shared relationship status chosen by the invited partner during pairing and displayed on Home, and a shared daily streak feature that increments only when both partners check in on the same day and is displayed on Home.",
   "architectural_notes": [
     "Use Firebase as the backend (authentication + data storage) for users, couple connections, and daily check-ins.",
@@ -252,6 +252,22 @@
         "REQ-46"
       ],
       "version": 1
+    },
+    {
+      "id": "feature-add-a-frontend-avatar-creation-selection-ui-that-lets-an-authenticated-user-set-or-change-their-avatar-and-saves-it-using-the-existing-profile-save-flow",
+      "title": "Add a frontend avatar creation/selection UI that lets an authenticated user set or change their avatar and saves it using the existing profile save flow.",
+      "reqIds": [
+        "REQ-50"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-display-user-avatars-in-the-paired-experience-using-existing-profile-data-show-the-current-user-avatar-and-partner-avatar-wherever-the-app-presents-identity-context-e-g-header-connection-area-with-sensible-fallbacks-when-an-avatar-is-not-set",
+      "title": "Display user avatars in the paired experience using existing profile data: show the current user avatar and partner avatar wherever the app presents identity context (e.g., header/connection area), with sensible fallbacks when an avatar is not set.",
+      "reqIds": [
+        "REQ-51"
+      ],
+      "version": 1
     }
   ],
   "new_feature_requests": [
@@ -472,6 +488,36 @@
       "summary": "Update the backend relationship-status update logic so that, after the initial relationship status has been set, either partner can change the relationship status later and the new value is saved to BOTH user profiles.",
       "reqIds": [
         "REQ-44"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-46",
+      "summary": "Add an avatar creation feature so users can create/set avatars for their profiles (and display them in the paired experience).",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-47",
+      "summary": "Extend the backend `UserProfile` data model to persist a user avatar value, and expose it through existing profile query methods (`getCallerUserProfile`, `getUserProfile`).",
+      "reqIds": [
+        "REQ-47"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-48",
+      "summary": "Update `saveCallerUserProfile` so callers can set/update their avatar while continuing to preserve all server-managed or pairing-related fields (e.g., `premium`, `partner_ref`, `relationship_status`, `streak_count`, `last_checkin_date`) exactly as the current implementation does for other editable fields.",
+      "reqIds": [
+        "REQ-48"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-49",
+      "summary": "Add a conditional migration for existing persisted user profile state to initialize the new avatar field to a safe default for all existing users, following the project’s migration policy.",
+      "reqIds": [
+        "REQ-49"
       ],
       "status": "pending"
     }

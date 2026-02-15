@@ -2,32 +2,13 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-update-the-frontend-relationship-status-mutation-logic-to-support-both-flows-1-initial-status-selection-restricted-to-the-invited-user-and-2-subsequent-status-changes-allowed-by-either-paired-user-when-a-status-already-exists",
-      "featureTitle": "Update the frontend relationship-status mutation logic to support both flows: (1) initial status selection restricted to the invited user and (2) subsequent status changes allowed by either paired user when a status already exists.",
+      "featureId": "feature-add-a-frontend-avatar-creation-selection-ui-that-lets-an-authenticated-user-set-or-change-their-avatar-and-saves-it-using-the-existing-profile-save-flow",
+      "featureTitle": "Add a frontend avatar creation/selection UI that lets an authenticated user set or change their avatar and saves it using the existing profile save flow.",
       "files": [
-        "frontend/src/features/relationshipStatus/useSetRelationshipStatus.ts"
-      ],
-      "components": [
-        "authorization@4.0.0",
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0",
-        "invite-links@3.0.0"
-      ],
-      "testIds": [
-        "REQ-45"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-add-a-settings-ui-control-that-allows-a-paired-user-to-change-the-existing-relationship-status-using-the-same-set-of-status-options-already-used-in-the-app-and-show-an-english-success-toast-after-saving",
-      "featureTitle": "Add a Settings UI control that allows a paired user to change the existing relationship status (using the same set of status options already used in the app), and show an English success toast after saving.",
-      "files": [
-        "frontend/src/features/relationshipStatus/ChangeRelationshipStatusControl.tsx",
-        "frontend/src/features/relationshipStatus/ChooseRelationshipStatusView.tsx",
-        "frontend/src/features/relationshipStatus/relationshipStatusOptions.ts",
+        "frontend/src/features/profile/AvatarPicker.tsx",
+        "frontend/src/features/profile/ProfileSetupDialog.tsx",
+        "frontend/src/features/profile/avatarUtils.ts",
+        "frontend/src/features/profile/useSaveCallerUserProfile.ts",
         "frontend/src/features/settings/SettingsView.tsx"
       ],
       "components": [
@@ -40,7 +21,29 @@
         "invite-links@3.0.0"
       ],
       "testIds": [
-        "REQ-46"
+        "REQ-50"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-display-user-avatars-in-the-paired-experience-using-existing-profile-data-show-the-current-user-avatar-and-partner-avatar-wherever-the-app-presents-identity-context-e-g-header-connection-area-with-sensible-fallbacks-when-an-avatar-is-not-set",
+      "featureTitle": "Display user avatars in the paired experience using existing profile data: show the current user avatar and partner avatar wherever the app presents identity context (e.g., header/connection area), with sensible fallbacks when an avatar is not set.",
+      "files": [
+        "frontend/src/components/avatars/AvatarBadge.tsx",
+        "frontend/src/components/layout/AppLayout.tsx",
+        "frontend/src/features/pairing/usePairingStatus.ts"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0",
+        "invite-links@3.0.0"
+      ],
+      "testIds": [
+        "REQ-51"
       ],
       "confidence": "high"
     }
